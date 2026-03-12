@@ -201,49 +201,28 @@
         // 混合版卡池：寶可夢 + Twice + NBA球星
         // 總機率：UR(3%) + SSR(9%) + SR(15%) + R(24%) + N(49%) = 100%
         // ==========================================
-        const cardPool = [
-            // 🚨 隱藏特賞 (機率 0%，僅限 N 卡 5 合 1 取得)
-            { id: "c_sp1", name: "【SP】超古代覺醒・裂空座", rarity: "SP", chance: 0, image: "images/SP1.jpg" },
-
-            // 🔥 UR 區 (共 6 張，每張 0.5%，合計 3%)
-            { id: "c1", name: "【UR】暗黑・洛奇亞", rarity: "UR", chance: 0.5, image: "images/UR1.jpg" },
-            { id: "c2", name: "【UR】光明・洛奇亞", rarity: "UR", chance: 0.5, image: "images/UR2.jpg" },
-            { id: "c3", name: "【UR】光明・鳳王", rarity: "UR", chance: 0.5, image: "images/UR3.jpg" },
-            { id: "c4", name: "【UR】對戰・鳳王", rarity: "UR", chance: 0.5, image: "images/UR4.jpg" },
-            { id: "c5", name: "【UR】期間限定・Twice", rarity: "UR", chance: 0.5, image: "images/UR5.png" },
-            { id: "c6", name: "【UR】籃球之神・喬丹", rarity: "UR", chance: 0.5, image: "images/MJ_UR.png" },
-
-            // ✨ SSR 區 (共 6 張，每張 1.5%，合計 9%)
-            { id: "c7", name: "【SSR】全圖洛奇亞", rarity: "SSR", chance: 1.5, image: "images/SSR1.jpg" },
-            { id: "c8", name: "【SSR】異色洛奇亞", rarity: "SSR", chance: 1.5, image: "images/SSR2.jpg" },
-            { id: "c9", name: "【SSR】浮雕洛奇亞", rarity: "SSR", chance: 1.5, image: "images/SSR3.jpg" },
-            { id: "c10", name: "【SSR】全圖鳳王", rarity: "SSR", chance: 1.5, image: "images/SSR4.jpg" },
-            { id: "c11", name: "【SSR】三分神射・Curry", rarity: "SSR", chance: 1.5, image: "images/SC_SSR.png" },
-            { id: "c12", name: "【SSR】死神・KD", rarity: "SSR", chance: 1.5, image: "images/KD_SSR.png" },
-
-            // 🌟 SR 區 (共 5 張，每張 3.0%，合計 15%)
-            { id: "c13", name: "【SR】洛奇亞ex", rarity: "SR", chance: 3.0, image: "images/SR1.jpg" },
-            { id: "c14", name: "【SR】鳳王ex", rarity: "SR", chance: 3.0, image: "images/SR2.jpg" },
-            { id: "c15", name: "【SR】浴火狀元・康寧漢", rarity: "SR", chance: 3.0, image: "images/CC_SR.png" },
-            { id: "c16", name: "【SR】鬍鬚張・哈登", rarity: "SR", chance: 3.0, image: "images/JH_SR.png" },
-            { id: "c17", name: "【SR】城堡哥・Stephon Castle", rarity: "SR", chance: 3.0, image: "images/SC_SR.png" },
-
-            // ⭐ R 區 (共 6 張，每張 4.0%，合計 24%)
-            { id: "c18", name: "【R】洛奇亞", rarity: "R", chance: 4.0, image: "images/R1.jpg" },
-            { id: "c19", name: "【R】鳳王", rarity: "R", chance: 4.0, image: "images/R2.jpg" },
-            { id: "c20", name: "【R】NBA陳奕迅・Tuner", rarity: "R", chance: 4.0, image: "images/MT_R.png" },
-            { id: "c21", name: "【R】拳王・追夢綠", rarity: "R", chance: 4.0, image: "images/DG_R.png" },
-            { id: "c22", name: "【R】泳池派對・普爾", rarity: "R", chance: 4.0, image: "images/JP_R.png" },
-            { id: "c23", name: "【R】冷凍王・苦命家", rarity: "R", chance: 4.0, image: "images/JK_R.png" },
-
-            // 🟢 N 區 (共 7 張，每張 7.0%，合計 49%)
-            { id: "c24", name: "【N】小山豬", rarity: "N", chance: 7.0, image: "images/N1.jpg" },
-            { id: "c25", name: "【N】阿羅拉小拳石", rarity: "N", chance: 7.0, image: "images/N2.jpg" },
-            { id: "c26", name: "【N】小火龍", rarity: "N", chance: 7.0, image: "images/N3.jpg" },
-            { id: "c27", name: "【N】阿羅拉烏波", rarity: "N", chance: 7.0, image: "images/N4.jpg" },
-            { id: "c28", name: "【N】愛吃豚", rarity: "N", chance: 7.0, image: "images/N5.jpg" },
-            { id: "c29", name: "【N】原野水母", rarity: "N", chance: 7.0, image: "images/N6.jpg" },
-            { id: "c30", name: "【N】光蚵仔", rarity: "N", chance: 7.0, image: "images/N7.jpg" }
+       const cardPool = [
+            { id: "c_sp1", name: "【SP】生日快樂・阿信", rarity: "SP", chance: 0, image: "images/SP1.png" },
+            { id: "c1", name: "【UR】紫・五月天", rarity: "UR", chance: 1, image: "images/UR1.png" },
+            { id: "c2", name: "【UR】金・五月天", rarity: "UR", chance: 1, image: "images/UR2.png" },
+            { id: "c3", name: "【UR】橘・五月天", rarity: "UR", chance: 1, image: "images/UR3.png" },
+            { id: "c4", name: "【UR】粉・五月天", rarity: "UR", chance: 1, image: "images/UR4.png" },
+            { id: "c5", name: "【UR】煙火・五月天", rarity: "UR", chance: 1, image: "images/UR5.png" },
+            { id: "c6", name: "【SSR】派對動物", rarity: "SSR", chance: 2.5, image: "images/SSR1.png" },
+            { id: "c7", name: "【SSR】Radio", rarity: "SSR", chance: 2.5, image: "images/SSR2.png" },
+            { id: "c8", name: "【SSR】蕭煌奇", rarity: "SSR", chance: 2.5, image: "images/SSR3.png" },
+            { id: "c9", name: "【SSR】怪獸・阿信", rarity: "SSR", chance: 2.5, image: "images/SSR4.png" },
+            { id: "c10", name: "【SR】任意門", rarity: "SR", chance: 7.5, image: "images/SR1.png" },
+            { id: "c11", name: "【SR】擁抱", rarity: "SR", chance: 7.5, image: "images/SR2.png" },
+            { id: "c12", name: "【R】紅・阿信", rarity: "R", chance: 10, image: "images/R1.png" },
+            { id: "c13", name: "【R】藍・阿信", rarity: "R", chance: 10, image: "images/R2.png" },
+            { id: "c14", name: "【N】冠佑", rarity: "N", chance: 7.1, image: "images/N1.png" },
+            { id: "c15", name: "【N】怪獸", rarity: "N", chance: 7.1, image: "images/N2.png" },
+            { id: "c16", name: "【N】怪獸", rarity: "N", chance: 7.1, image: "images/N3.png" },
+            { id: "c17", name: "【N】石頭", rarity: "N", chance: 7.1, image: "images/N4.png" },
+            { id: "c18", name: "【N】瑪莎", rarity: "N", chance: 7.1, image: "images/N5.png" },
+            { id: "c19", name: "【N】冠佑", rarity: "N", chance: 7.1, image: "images/N6.png" },
+            { id: "c20", name: "【N】怪獸", rarity: "N", chance: 7.4, image: "images/N7.png" }
         ];
 
 // ==========================================
@@ -1029,3 +1008,4 @@
 </body>
 
 </html>
+
