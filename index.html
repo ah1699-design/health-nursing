@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>程式語言設計 - 抽卡特訓班 (30題連擊版)</title>
+    <style>
+        body {
+            font-family: '微軟正黑體', sans-serif; 
+            background-color: #1a1a2e; 
+            color: #ecf0f1; display: flex; justify-content: center;
+            align-items: center; height: 100vh; margin: 0; overflow: hidden;
+            transition: background-color 0.5s ease; 
+        }
+        
+        body.rescue-mode { background-color: #4a1010; }
+
+        .container {
+            background-color: #2c3e50; width: 90%; max-width: 650px;
+            padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            text-align: center; max-height: 90vh; overflow-y: auto; position: relative;
+        }
+        h1 { color: #f1c40f; margin-bottom: 5px; }
+        .subtitle { color: #95a5a6; margin-bottom: 20px; font-size: 14px; }
+        
+        #student-setup { display: block; }
+        #game-area { display: none; }
+        #result-area { display: none; }
+
+        input[type="text"] {
+            width: 80%; padding: 15px; font-size: 18px; border-radius: 8px; 
+            border: 2px solid #3498db; background: #1a1a2e; color: white; 
+            text-align: center; margin-bottom: 20px;
+        }
+        
+        .status-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            background: #16213e; padding: 10px 20px; border-radius: 10px; margin-bottom: 20px;
+        }
+        /* 👇 修改了 HP bar 的排版以容納連擊條 👇 */
+        .hp-bar { font-size: 18px; color: #e74c3c; text-align: left; display: flex; align-items: center; gap: 10px;}
+        .streak-badge { background: #d35400; color: white; padding: 3px 8px; border-radius: 5px; font-size: 14px; font-weight: bold; }
+        
+        .inventory { font-size: 14px; color: #f1c40f; text-align: right; font-weight: bold;}
+        
+        .tag {
+            display: inline-block; background: #e74c3c; color: white;
+            padding: 5px 10px; border-radius: 5px; font-size: 14px; margin-bottom: 15px; font-weight: bold;
+        }
+        .question-text { font-size: 22px; line-height: 1.5; margin-bottom: 30px; }
+
+        .btn {
+            display: block; width: 100%; padding: 15px; margin-bottom: 15px;
+            font-size: 18px; cursor: pointer; border: none; border-radius: 8px;
+            background-color: #34495e; color: white; font-weight: bold; transition: 0.2s; box-shadow: 0 4px #2c3e50;
+        }
+        .btn:hover { background-color: #3498db; }
+        .btn:active { transform: translateY(4px); box-shadow: none; }
+        .btn-start { background-color: #27ae60; box-shadow: 0 4px #1e8449; margin-top: 10px; }
+        .btn-collection { background-color: #8e44ad; box-shadow: 0 4px #732d91; }
+
+        #log-report { text-align: left; background: #1a1a2e; padding: 15px; border-radius: 8px; color: #f39c12; font-size: 16px; margin-bottom: 20px; max-height: 200px; overflow-y: auto;}
+        
+        #correct-splash {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            font-size: 80px; font-weight: bold; color: #2ecc71; text-shadow: 0 0 30px rgba(46, 204, 113, 0.8);
+            opacity: 0; pointer-events: none; transition: 0.3s; z-index: 150;
+        }
+        #correct-splash.show { opacity: 1; transform: translate(-50%, -60%) scale(1.2); }
+
+        #gacha-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); display: none; justify-content: center;
+            align-items: center; flex-direction: column; z-index: 200;
+        }
+        .gacha-card {
+            width: 250px; height: 350px; border-radius: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            font-size: 24px; font-weight: bold; color: white; text-align: center; padding: 20px; box-sizing: border-box; transform: scale(0);
+            transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); text-shadow: 2px 2px 4px rgba(0,0,0,0.5); position: relative; overflow: hidden;
+        }
+        .card-SP { background: linear-gradient(135deg, #ff00cc, #3333ff); box-shadow: 0 0 50px #ff00cc; border: 3px solid #fff; }
+        .card-UR { background: linear-gradient(135deg, #FFD700, #FF8C00); box-shadow: 0 0 40px #FFD700; border: 3px solid #fff; }
+        .card-SSR { background: linear-gradient(135deg, #ff007f, #7f00ff); box-shadow: 0 0 30px #ff007f; border: 2px solid #fff; }
+        .card-SR { background: linear-gradient(135deg, #00d2ff, #3a7bd5); box-shadow: 0 0 15px #00d2ff; }
+        .card-R { background: linear-gradient(135deg, #7f8c8d, #2c3e50); }
+        .card-N { background: linear-gradient(135deg, #bdc3c7, #7f8c8d); color: #2c3e50; border: 1px solid #95a5a6; }
+        
+        .gacha-title { color: white; font-size: 24px; margin-bottom: 20px; letter-spacing: 2px;}
+        .gacha-btn { margin-top: 30px; padding: 15px 40px; font-size: 20px; font-weight: bold; background: #e74c3c; color: white; border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 4px #c0392b; transition: 0.2s;}
+        .gacha-btn:active { transform: translateY(4px); box-shadow: none; }
+        .gacha-btn-collect { background: #3498db; box-shadow: 0 4px #2980b9; }
+
+        #collection-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95);
+            display: none; justify-content: flex-start; align-items: center; flex-direction: column; z-index: 300; padding-top: 50px; overflow-y: auto;
+        }
+        .collection-header { color: #f1c40f; font-size: 28px; margin-bottom: 20px; text-shadow: 0 0 10px #f39c12; }
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; width: 90%; max-width: 800px; padding-bottom: 80px;}
+        .mini-card { background: #2c3e50; border-radius: 10px; padding: 10px; text-align: center; border: 2px solid #34495e; position: relative; }
+        .mini-card img { width: 100%; border-radius: 5px; margin-bottom: 10px; }
+        .mini-card .name { font-size: 14px; font-weight: bold; color: white; }
+        .mini-card .count { position: absolute; top: -10px; right: -10px; background: #e74c3c; color: white; border-radius: 50%; width: 30px; height: 30px; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 14px; border: 2px solid #fff; z-index: 10; }
+        
+        .mini-card.unowned { border-color: #555; background: #1a252f; }
+        .mini-card.unowned img { filter: grayscale(100%) brightness(0.4); opacity: 0.6; }
+        .mini-card.unowned .name { color: #7f8c8d; }
+        
+        .btn-synth { margin-top: 8px; padding: 6px 0; font-size: 13px; background: #e67e22; color: white; border: none; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold; animation: pulse 1.5s infinite; }
+        .btn-synth:hover { background: #d35400; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(230, 126, 34, 0.7); } 70% { box-shadow: 0 0 0 8px rgba(230, 126, 34, 0); } 100% { box-shadow: 0 0 0 0 rgba(230, 126, 34, 0); } }
+        
+        .close-btn { margin-top: 30px; padding: 10px 30px; font-size: 18px; background: #95a5a6; color: white; border: none; border-radius: 8px; cursor: pointer; margin-bottom: 50px;}
+    </style>
+</head>
+<body>
+
+    <div id="correct-splash">⭕ 正確！</div>
+
+    <div id="gacha-overlay">
+        <div class="gacha-title" id="gacha-title">✨ 連擊達成！獲得抽卡機會！ ✨</div>
+        <button class="gacha-btn" id="pre-draw-btn" onclick="executeDraw()">👉 點擊抽卡 👈</button>
+        <div class="gacha-card" id="revealed-card" style="display:none;">
+            <img id="card-image" src="" style="width: 100%; max-height: 220px; object-fit: cover; border-radius: 10px; margin-bottom: 15px; display: none;">
+            <div id="card-name" style="font-size: 20px; line-height: 1.2;">卡片名稱</div>
+        </div>
+        <button class="gacha-btn gacha-btn-collect" id="post-draw-btn" onclick="closeGacha()" style="display:none;">收下神卡並繼續</button>
+    </div>
+
+    <div id="collection-modal">
+        <div class="collection-header" id="collection-title">🏆 專屬集卡冊</div>
+        <div class="card-grid" id="collection-grid"></div>
+        <button class="close-btn" onclick="closeCollection()">返回首頁</button>
+    </div>
+
+    <div class="container">
+        <div id="student-setup">
+            <h1>🏀 統測特訓：30題不間斷！</h1>
+            <div class="subtitle">連續答對 2 題即可抽卡！<br>(蒐集 5 張相同的 N 卡可融合為隱藏特效卡)</div>
+            <input type="text" id="student-name" placeholder="請輸入 班級+座號+姓名">
+            
+            <button class="btn" id="btn-sync" style="background-color: #2980b9; box-shadow: 0 4px #1c5980;" onclick="syncCloudData()">☁️ 1. 載入雲端圖鑑存檔</button>
+            
+            <button class="btn btn-start" onclick="startGame()">▶️ 2. 開始 30 題大挑戰</button>
+            <button class="btn btn-collection" onclick="openCollection()">📖 查看我的圖鑑進度</button>
+        </div>
+
+        <div id="game-area">
+            <div class="status-bar">
+                <div class="hp-bar" id="hp-display">
+                    <span id="hearts">❤️❤️❤️</span>
+                    <span class="streak-badge" id="streak-display">🔥 連擊: 0 / 2</span>
+                </div>
+                <div class="inventory" id="inventory-display">🎒 本局卡簿: 空</div>
+            </div>
+            <div class="tag" id="q-tag">標籤</div>
+            <div class="question-text" id="q-text">題目載入中...</div>
+            <div id="options-area"></div>
+        </div>
+
+        <div id="result-area">
+            <h1>測驗完成！🎉</h1>
+            <p>戰利品已自動存入集卡冊，診斷報告已傳送給老師。</p>
+            <div id="log-report"></div>
+            <button class="btn btn-collection" style="margin-top:20px;" onclick="location.reload()">返回首頁查看集卡冊</button>
+        </div>
+    </div>
+
+    <script>
+        // === 音效引擎 ===
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let audioCtx;
+        function initAudio() { 
+            if (!audioCtx) audioCtx = new AudioContext(); 
+            if (audioCtx.state === 'suspended') audioCtx.resume(); 
+        }
+        function playSound(type) {
+            initAudio();
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            
+            if (type === 'correct') {
+                osc.type = 'sine'; osc.frequency.setValueAtTime(800, now); osc.frequency.exponentialRampToValueAtTime(1200, now + 0.1);
+                gain.gain.setValueAtTime(0.3, now); osc.start(now); osc.stop(now + 0.15);
+            } else if (type === 'wrong') {
+                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, now); osc.frequency.exponentialRampToValueAtTime(80, now + 0.3);
+                gain.gain.setValueAtTime(0.3, now); osc.start(now); osc.stop(now + 0.3);
+            } else if (type === 'draw') {
+                osc.type = 'square'; osc.frequency.setValueAtTime(400, now); osc.frequency.linearRampToValueAtTime(800, now + 0.5);
+                gain.gain.setValueAtTime(0.2, now); osc.start(now); osc.stop(now + 0.5);
+            } else if (type === 'synth') {
+                osc.type = 'sine'; osc.frequency.setValueAtTime(300, now); 
+                osc.frequency.linearRampToValueAtTime(600, now + 0.3);
+                osc.frequency.linearRampToValueAtTime(1200, now + 0.6);
+                gain.gain.setValueAtTime(0.4, now); osc.start(now); osc.stop(now + 0.7);
+            }
+        }
+
+// ==========================================
+        // 混合版卡池：寶可夢 + Twice + NBA球星
+        // 總機率：UR(3%) + SSR(9%) + SR(15%) + R(24%) + N(49%) = 100%
+        // ==========================================
+        const cardPool = [
+            // 🚨 隱藏特賞 (機率 0%，僅限 N 卡 5 合 1 取得)
+            { id: "c_sp1", name: "【SP】超古代覺醒・裂空座", rarity: "SP", chance: 0, image: "images/SP1.jpg" },
+
+            // 🔥 UR 區 (共 6 張，每張 0.5%，合計 3%)
+            { id: "c1", name: "【UR】暗黑・洛奇亞", rarity: "UR", chance: 0.5, image: "images/UR1.jpg" },
+            { id: "c2", name: "【UR】光明・洛奇亞", rarity: "UR", chance: 0.5, image: "images/UR2.jpg" },
+            { id: "c3", name: "【UR】光明・鳳王", rarity: "UR", chance: 0.5, image: "images/UR3.jpg" },
+            { id: "c4", name: "【UR】對戰・鳳王", rarity: "UR", chance: 0.5, image: "images/UR4.jpg" },
+            { id: "c5", name: "【UR】期間限定・Twice", rarity: "UR", chance: 0.5, image: "images/UR5.png" },
+            { id: "c6", name: "【UR】籃球之神・喬丹", rarity: "UR", chance: 0.5, image: "images/MJ_UR.png" },
+
+            // ✨ SSR 區 (共 6 張，每張 1.5%，合計 9%)
+            { id: "c7", name: "【SSR】全圖洛奇亞", rarity: "SSR", chance: 1.5, image: "images/SSR1.jpg" },
+            { id: "c8", name: "【SSR】異色洛奇亞", rarity: "SSR", chance: 1.5, image: "images/SSR2.jpg" },
+            { id: "c9", name: "【SSR】浮雕洛奇亞", rarity: "SSR", chance: 1.5, image: "images/SSR3.jpg" },
+            { id: "c10", name: "【SSR】全圖鳳王", rarity: "SSR", chance: 1.5, image: "images/SSR4.jpg" },
+            { id: "c11", name: "【SSR】三分神射・Curry", rarity: "SSR", chance: 1.5, image: "images/SC_SSR.png" },
+            { id: "c12", name: "【SSR】死神・KD", rarity: "SSR", chance: 1.5, image: "images/KD_SSR.png" },
+
+            // 🌟 SR 區 (共 5 張，每張 3.0%，合計 15%)
+            { id: "c13", name: "【SR】洛奇亞ex", rarity: "SR", chance: 3.0, image: "images/SR1.jpg" },
+            { id: "c14", name: "【SR】鳳王ex", rarity: "SR", chance: 3.0, image: "images/SR2.jpg" },
+            { id: "c15", name: "【SR】浴火狀元・康寧漢", rarity: "SR", chance: 3.0, image: "images/CC_SR.png" },
+            { id: "c16", name: "【SR】鬍鬚張・哈登", rarity: "SR", chance: 3.0, image: "images/JH_SR.png" },
+            { id: "c17", name: "【SR】城堡哥・Stephon Castle", rarity: "SR", chance: 3.0, image: "images/SC_SR.png" },
+
+            // ⭐ R 區 (共 6 張，每張 4.0%，合計 24%)
+            { id: "c18", name: "【R】洛奇亞", rarity: "R", chance: 4.0, image: "images/R1.jpg" },
+            { id: "c19", name: "【R】鳳王", rarity: "R", chance: 4.0, image: "images/R2.jpg" },
+            { id: "c20", name: "【R】NBA陳奕迅・Tuner", rarity: "R", chance: 4.0, image: "images/MT_R.png" },
+            { id: "c21", name: "【R】拳王・追夢綠", rarity: "R", chance: 4.0, image: "images/DG_R.png" },
+            { id: "c22", name: "【R】泳池派對・普爾", rarity: "R", chance: 4.0, image: "images/JP_R.png" },
+            { id: "c23", name: "【R】冷凍王・苦命家", rarity: "R", chance: 4.0, image: "images/JK_R.png" },
+
+            // 🟢 N 區 (共 7 張，每張 7.0%，合計 49%)
+            { id: "c24", name: "【N】小山豬", rarity: "N", chance: 7.0, image: "images/N1.jpg" },
+            { id: "c25", name: "【N】阿羅拉小拳石", rarity: "N", chance: 7.0, image: "images/N2.jpg" },
+            { id: "c26", name: "【N】小火龍", rarity: "N", chance: 7.0, image: "images/N3.jpg" },
+            { id: "c27", name: "【N】阿羅拉烏波", rarity: "N", chance: 7.0, image: "images/N4.jpg" },
+            { id: "c28", name: "【N】愛吃豚", rarity: "N", chance: 7.0, image: "images/N5.jpg" },
+            { id: "c29", name: "【N】原野水母", rarity: "N", chance: 7.0, image: "images/N6.jpg" },
+            { id: "c30", name: "【N】光蚵仔", rarity: "N", chance: 7.0, image: "images/N7.jpg" }
+        ];
+
+// ==========================================
+        // 教師設定區：衛護類專二 (健康消費、食安、解剖生理、急救) + 五月天穿插
+        // 圖片請確保與 HTML 檔案放在同一層目錄
+        // ==========================================
+        const quizData = {
+            // --- 第 1 關：影響消費因素 ---
+            "q1": {
+                tag: "第 1 關：健康消費",
+                text: "小明看到同學都買了某款運動手環，覺得自己不買會跟不上流行。這屬於哪一種影響消費行為的因素？",
+                options: [
+                    { text: "A. 外在因素：同儕文化", next: "q2", isCorrect: true },
+                    { text: "B. 內在因素：人格特質", next: "q1_help", log: "Q1錯: 這是受他人影響而非個人性格" },
+                    { text: "C. 外在因素：政府政治", next: "q1_help", log: "Q1錯: 同學不是政府機關喔" },
+                    { text: "D. 內在因素：生理需求", next: "q1_help", log: "Q1錯: 流行不是肚子餓這種生理需求" }
+                ]
+            },
+            "q1_help": {
+                tag: "💊 救援任務：內外分辨",
+                text: "只要是來自「他人、社會、廣告、文化」的影響，都屬於『外在因素』。同學的影響屬於哪一種？",
+                options: [
+                    { text: "A. 外在因素", next: "q1", isCorrect: true },
+                    { text: "B. 內在因素", next: "q1_help", log: "Q1救錯: 自己想買才是內在，別人影響是外在！" }
+                ]
+            },
+
+            // 🎸 第 2 關：娛樂穿插 (五月天 1)
+            "q2": {
+                tag: "🎸 第 2 關：資深粉考驗 (五月天)",
+                text: "五月天的哪一位團員曾在《為愛而生》專輯遠赴突尼西亞拍攝時，在古羅馬競技場前穿著白色襯衫被戲稱為「白馬王子」，且是團內的貝斯手？",
+                options: [
+                    { text: "A. 瑪莎 (Masa)", next: "q3", isCorrect: true },
+                    { text: "B. 阿信", next: "q2_help", log: "Q2錯: 阿信是主唱啦" },
+                    { text: "C. 怪獸", next: "q2_help", log: "Q2錯: 怪獸是團長吉他手" },
+                    { text: "D. 冠佑", next: "q2_help", log: "Q2錯: 冠佑是鼓手" }
+                ]
+            },
+            "q2_help": {
+                tag: "💊 提示：尖莎嘴",
+                text: "這位團員以說話犀利、頭髮長度常蓋過眼睛著稱，也是五月天最有「文青感」的貝斯手。他是？",
+                options: [
+                    { text: "A. 瑪莎", next: "q2", isCorrect: true },
+                    { text: "B. 石頭", next: "q2_help", log: "Q2救錯: 石頭是吉他手喔！" }
+                ]
+            },
+
+            // --- 第 3 關：媒體行銷手法 ---
+            "q3": {
+                tag: "第 3 關：消費辨識",
+                text: "某減肥產品廣告宣稱：「連續飲用 7 天，體重直降 10 公斤，且不需運動」。這涉及哪一種不當行銷手法？",
+                options: [
+                    { text: "A. 廣告誇大不實", next: "q4", isCorrect: true },
+                    { text: "B. 標示含糊不清", next: "q3_help", log: "Q3錯: 這是數字太浮誇，屬於誇大" },
+                    { text: "C. 名人代言", next: "q3_help", log: "Q3錯: 題目沒提到明星喔" },
+                    { text: "D. 贈品抽獎", next: "q3_help", log: "Q3錯: 這沒送東西" }
+                ]
+            },
+            "q3_help": {
+                tag: "💊 救援任務：神奇療效",
+                text: "當廣告宣稱的效果「神奇到不符合常理」（如一週瘦十公斤），這通常屬於什麼？",
+                options: [
+                    { text: "A. 誇大不實", next: "q3", isCorrect: true },
+                    { text: "B. 誠實廣告", next: "q3_help", log: "Q3救錯: 這效果太誇張了，怎麼可能誠實！" }
+                ]
+            },
+
+            // --- 第 4 關：判斷策略 (停看聽) ---
+            "q4": {
+                tag: "第 4 關：消費策略",
+                text: "購物前先諮詢醫生或藥師的專業建議，確認產品的真實性。這屬於「停、看、聽」中的哪一步？",
+                options: [
+                    { text: "A. 聽：請益他人、澄清疑惑", next: "q5", isCorrect: true },
+                    { text: "B. 停：冷靜思考、切勿衝動", next: "q4_help", log: "Q4錯: 思考是「停」，問人是「聽」" },
+                    { text: "C. 看：用心搜尋、看清說明", next: "q4_help", log: "Q4錯: 自己查資料才是「看」" },
+                    { text: "D. 買：直接購買、支持國產", next: "q4_help", log: "Q4錯: 還沒買啦" }
+                ]
+            },
+            "q4_help": {
+                tag: "💊 救援任務：口訣分辨",
+                text: "『停』是腦袋思考，『看』是眼睛查標示，『聽』是耳朵聽專業建議。請問諮詢藥師是用哪個？",
+                options: [
+                    { text: "A. 聽", next: "q4", isCorrect: true },
+                    { text: "B. 停", next: "q4_help", log: "Q4救錯: 是聽人說話喔！" }
+                ]
+            },
+
+            // 🎸 第 5 關：娛樂穿插 (五月天 2)
+            "q5": {
+                tag: "🎸 第 5 關：資深粉考驗 (五月天)",
+                text: "五月天在 2001 年發行了哪一張專輯後暫時告別樂迷，團員分別去當兵、留學，並在高雄、台北舉辦了盛大的「離別演唱會」？",
+                options: [
+                    { text: "A. 《人生海海》", next: "q6", isCorrect: true },
+                    { text: "B. 《愛情萬歲》", next: "q5_help", log: "Q5錯: 這是 2000 年發行的" },
+                    { text: "C. 《時光機》", next: "q5_help", log: "Q5錯: 這是復出後的專輯" },
+                    { text: "D. 《為愛而生》", next: "q5_help", log: "Q5錯: 這是更後期的專輯" }
+                ]
+            },
+            "q5_help": {
+                tag: "💊 提示：藍色三部曲",
+                text: "這是五月天「藍色三部曲」的最後一張，封面是五個人站在沙灘上。經典歌曲包含〈純真〉、〈候鳥〉。它是？",
+                options: [
+                    { text: "A. 人生海海", next: "q5", isCorrect: true },
+                    { text: "B. 瘋狂世界", next: "q5_help", log: "Q5救錯: 那是第一張喔！" }
+                ]
+            },
+
+            // --- 第 6 關：醫藥廣告辨識 ---
+            "q6": {
+                tag: "第 6 關：廣告字號",
+                text: "根據藥物廣告辨識五步驟，廣告內容不得涉及醫療效能的是哪類產品？",
+                options: [
+                    { text: "A. 食品及一般化妝品", next: "q7", isCorrect: true },
+                    { text: "B. 指示藥品", next: "q6_help", log: "Q6錯: 藥品本來就可以宣稱療效" },
+                    { text: "C. 醫療器材", next: "q6_help", log: "Q6錯: 醫材也能宣稱特定功能" },
+                    { text: "D. 處方藥品", next: "q6_help", log: "Q6錯: 雖然廣告受限，但仍具療效" }
+                ]
+            },
+
+            // --- 第 7 關：八大權利 ---
+            "q7": {
+                tag: "第 7 關：消費者權益",
+                text: "當產品發生瑕疵或品質劣質時，消費者有權要求更換、維修或退款。這屬於哪一項八大權利？",
+                options: [
+                    { text: "A. 請求賠償權", next: "q8", isCorrect: true },
+                    { text: "B. 基本需求權", next: "q7_help", log: "Q7錯: 基本需求是指食衣住行" },
+                    { text: "C. 消費教育權", next: "q7_help", log: "Q7錯: 教育是學習消費知識" },
+                    { text: "D. 表達意見權", next: "q7_help", log: "Q7錯: 表達意見是參加政策討論" }
+                ]
+            },
+
+            // 🎸 第 8 關：娛樂穿插 (五月天 3)
+            "q8": {
+                tag: "🎸 第 8 關：資深粉考驗 (五月天)",
+                text: "五月天的第一張創作專輯《瘋狂世界》封面上，五個人是穿著什麼主色調的衣服站在一起？",
+                options: [
+                    { text: "A. 白色", next: "q9", isCorrect: true },
+                    { text: "B. 黑色", next: "q8_help", log: "Q8錯: 那是後期的風格" },
+                    { text: "C. 彩色", next: "q8_help", log: "Q8錯: 第一張走清新風" },
+                    { text: "D. 牛仔裝", next: "q8_help", log: "Q8錯: 不是這種復古裝扮" }
+                ]
+            },
+
+            // --- 第 9 關：五大義務 ---
+            "q9": {
+                tag: "第 9 關：消費者義務",
+                text: "消費者在日常生活中支持在地食材、選購環保標章產品。這屬於哪一項義務？",
+                options: [
+                    { text: "A. 環保義務", next: "q10", isCorrect: true },
+                    { text: "B. 團結義務", next: "q9_help", log: "Q9錯: 團結是大家集結力量" },
+                    { text: "C. 認知義務", next: "q9_help", log: "Q9錯: 認知是了解品質價格" },
+                    { text: "D. 關懷義務", next: "q9_help", log: "Q9錯: 關懷是不傷害他人" }
+                ]
+            },
+
+            // --- 第 10 關：消化系統 (解剖生理) ---
+            "q10": {
+                tag: "第 10 關：解剖生理",
+                text: "人體主要的消化與吸收器官，且表面具有大量絨毛以增加吸收面積的是哪一個器官？",
+                options: [
+                    { text: "A. 小腸", next: "q11", isCorrect: true },
+                    { text: "B. 胃", next: "q10_help", log: "Q10錯: 胃主要是初步分解與儲存" },
+                    { text: "C. 大腸", next: "q10_help", log: "Q10錯: 大腸主要是吸收水分" },
+                    { text: "D. 食道", next: "q10_help", log: "Q10錯: 食道僅是通道" }
+                ]
+            },
+            "q10_help": {
+                tag: "💊 救援任務：吸收之王",
+                text: "這段消化道非常長（約6-7公尺），絕大部分的營養都在這裡被吸收進血液中。它是？",
+                options: [
+                    { text: "A. 小腸", next: "q10", isCorrect: true },
+                    { text: "B. 大腸", next: "q10_help", log: "Q10救錯: 大腸主要是回收水分形成糞便喔！" }
+                ]
+            },
+
+            // --- 第 11 關：消費爭議處理 ---
+            "q11": {
+                tag: "第 11 關：申訴流程",
+                text: "發生消費爭議後，若向企業申訴未果，第二階段應向各縣市政府的誰提出申訴？",
+                options: [
+                    { text: "A. 消費者保護官 (消保官)", next: "q12", isCorrect: true },
+                    { text: "B. 警察局長", next: "q11_help", log: "Q11錯: 這是民事糾紛" },
+                    { text: "C. 衛生局長", next: "q11_help", log: "Q11錯: 專責消保應找消保官" },
+                    { text: "D. 法院院長", next: "q11_help", log: "Q11錯: 這是申訴而非起訴" }
+                ]
+            },
+
+            // --- 第 12 關：1950 專線 ---
+            "q12": {
+                tag: "第 12 關：諮詢管道",
+                text: "全國消費者服務專線，取其諧音「依舊守護」的號碼是多少？",
+                options: [
+                    { text: "A. 1950", next: "q13", isCorrect: true },
+                    { text: "B. 1922", next: "q12_help", log: "Q12錯: 那是防疫專線" },
+                    { text: "C. 1999", next: "q12_help", log: "Q12錯: 那是縣市民服務" },
+                    { text: "D. 113", next: "q12_help", log: "Q12錯: 那是婦幼保護" }
+                ]
+            },
+
+            // 🎸 第 13 關：娛樂穿插 (五月天 4)
+            "q13": {
+                tag: "🎸 第 13 關：資深粉考驗 (五月天)",
+                text: "五月天哪一首歌的歌詞中提到：「就算整個世界把我拋棄，而至少快樂傷心我自己決定」？",
+                options: [
+                    { text: "A. 倔強", next: "q14", isCorrect: true },
+                    { text: "B. 憨人", next: "q13_help", log: "Q13錯: 憨人是『我有我的路』" },
+                    { text: "C. 溫柔", next: "q13_help", log: "Q13錯: 溫柔是『讓全部的自由還給你』" },
+                    { text: "D. 派對動物", next: "q13_help", log: "Q13錯: 歌詞風格不符" }
+                ]
+            },
+
+            // --- 第 14 關：食品危害因子 ---
+            "q14": {
+                tag: "第 14 關：食品安全",
+                text: "農藥殘留、添加物超標、抗生素殘留，這屬於哪一類食品危害因子？",
+                options: [
+                    { text: "A. 化學性危害", next: "q15", isCorrect: true },
+                    { text: "B. 物理性危害", next: "q14_help", log: "Q14錯: 物理是硬物顆粒" },
+                    { text: "C. 生物性危害", next: "q14_help", log: "Q14錯: 生物是細菌毒素" },
+                    { text: "D. 基因改造危害", next: "q14_help", log: "Q14錯: 分類不同" }
+                ]
+            },
+
+            // --- 第 15 關：循環系統 (解剖生理) ---
+            "q15": {
+                tag: "第 15 關：解剖生理",
+                text: "人體中負責攜帶氧氣，且不具備細胞核、呈雙凹圓盤狀的血球細胞是？",
+                options: [
+                    { text: "A. 紅血球", next: "q16", isCorrect: true },
+                    { text: "B. 白血球", next: "q15_help", log: "Q15錯: 白血球負責免疫防禦" },
+                    { text: "C. 血小板", next: "q15_help", log: "Q15錯: 血小板負責凝血" },
+                    { text: "D. 漿細胞", next: "q15_help", log: "Q15錯: 漿細胞產生抗體" }
+                ]
+            },
+
+            // --- 第 16 關：風險評估四步驟 ---
+            "q16": {
+                tag: "第 16 關：食安風險",
+                text: "評估中「了解人體實際攝取該種有害物質的多寡」，是哪一個步驟？",
+                options: [
+                    { text: "A. 暴露評估 (Exposure Assessment)", next: "q17", isCorrect: true },
+                    { text: "B. 危害辨識", next: "q16_help", log: "Q16錯: 辨識是看有無危害" },
+                    { text: "C. 危害特性化", next: "q16_help", log: "Q16錯: 這是看劑量反應" },
+                    { text: "D. 風險特性化", next: "q16_help", log: "Q16錯: 這是整合發生機率" }
+                ]
+            },
+
+            // --- 第 17 關：CPR 急救知識 ---
+            "q17": {
+                tag: "第 17 關：急救處理",
+                text: "針對成人進行心肺復甦術 (CPR) 時，胸外按壓與人工呼吸的比例應為何？",
+                options: [
+                    { text: "A. 30 : 2", next: "q18", isCorrect: true },
+                    { text: "B. 15 : 2", next: "q17_help", log: "Q17錯: 這是早期或特殊狀況比例" },
+                    { text: "C. 30 : 5", next: "q17_help", log: "Q17錯: 比例不對喔" },
+                    { text: "D. 10 : 1", next: "q17_help", log: "Q17錯: 太少按壓了" }
+                ]
+            },
+
+            // --- 第 18 關：反式脂肪標示 ---
+            "q18": {
+                tag: "第 18 關：營養標示",
+                text: "根據法規，食品中反式脂肪含量低於多少%，即可標示為「0」？",
+                options: [
+                    { text: "A. 0.3%", next: "q19", isCorrect: true },
+                    { text: "B. 0.5%", next: "q18_help", log: "Q18錯: 法規規定更嚴格" },
+                    { text: "C. 1%", next: "q18_help", log: "Q18錯: 太高了" },
+                    { text: "D. 0.1%", next: "q18_help", log: "Q18錯: 沒那麼嚴格" }
+                ]
+            },
+
+            // --- 第 19 關：安全認證標章 ---
+            "q19": {
+                tag: "第 19 關：食品標章",
+                text: "強調「在地生產、安全衛生」，前身為 GMP 的食品驗證標章是？",
+                options: [
+                    { text: "A. TQF 標章", next: "q20", isCorrect: true },
+                    { text: "B. CAS 標章", next: "q19_help", log: "Q19錯: CAS 是優良農產品" },
+                    { text: "C. TAP 標章", next: "q19_help", log: "Q19錯: TAP 是產銷履歷" },
+                    { text: "D. 有機標章", next: "q19_help", log: "Q19錯: 有機是樹葉標章" }
+                ]
+            },
+
+            // 🎸 第 20 關：娛樂穿插 (五月天 5)
+            "q20": {
+                tag: "🎸 第 20 關：資深粉考驗 (五月天)",
+                text: "五月天的成員中，本名為「劉諺明」，後來在加入五月天後改名為現在名字的是哪位成員？",
+                options: [
+                    { text: "A. 冠佑", next: "q21", isCorrect: true },
+                    { text: "B. 怪獸", next: "q20_help", log: "Q20錯: 怪獸本名溫尚翊" },
+                    { text: "C. 瑪莎", next: "q20_help", log: "Q20錯: 瑪莎本名蔡昇晏" },
+                    { text: "D. 石頭", next: "q20_help", log: "Q20錯: 石頭本名石錦航" }
+                ]
+            },
+
+            // --- 第 21 關：內分泌系統 (解剖生理) ---
+            "q21": {
+                tag: "第 21 關：解剖生理",
+                text: "人體中唯一同時具備「外分泌（分泌消化酶）」與「內分泌（分泌胰島素）」功能的器官是？",
+                options: [
+                    { text: "A. 胰臟", next: "q22", isCorrect: true },
+                    { text: "B. 肝臟", next: "q21_help", log: "Q21錯: 肝臟主要分泌膽汁" },
+                    { text: "C. 脾臟", next: "q21_help", log: "Q21錯: 脾臟負責免疫與濾血" },
+                    { text: "D. 腎臟", next: "q21_help", log: "Q21錯: 腎臟負責排泄" }
+                ]
+            },
+
+            // --- 第 22 關：食安紅綠燈 ---
+            "q22": {
+                tag: "第 22 關：食安警報",
+                text: "食安紅綠燈燈號中，「產品已進入我國市場，且對人體有立即或重大危害」是哪一色？",
+                options: [
+                    { text: "A. 紅燈", next: "q23", isCorrect: true },
+                    { text: "B. 黃燈", next: "q22_help", log: "Q22錯: 黃燈是有疑慮" },
+                    { text: "C. 綠燈", next: "q22_help", log: "Q22錯: 綠燈是沒問題" },
+                    { text: "D. 橘燈", next: "q22_help", log: "Q22錯: 沒這燈號" }
+                ]
+            },
+
+            // --- 第 23 關：健康食品定義 ---
+            "q23": {
+                tag: "第 23 關：健康食品",
+                text: "根據《健康食品管理法》，「健康食品」本質上是什麼，不得宣稱具有醫療效能？",
+                options: [
+                    { text: "A. 食品", next: "q24", isCorrect: true },
+                    { text: "B. 藥品", next: "q23_help", log: "Q23錯: 藥品才有醫療效能" },
+                    { text: "C. 醫材", next: "q23_help", log: "Q23錯: 定義完全不同" },
+                    { text: "D. 營養劑", next: "q23_help", log: "Q23錯: 法律定位為食品" }
+                ]
+            },
+
+            // 🎸 第 24 關：娛樂穿插 (五月天 6)
+            "q24": {
+                tag: "🎸 第 24 關：資深粉考驗 (五月天)",
+                text: "五月天在台北大安森林公園野台首演（3月29日）那一天，被定為他們的什麼紀念日？",
+                options: [
+                    { text: "A. 成軍日", next: "q25", isCorrect: true },
+                    { text: "B. 解散日", next: "q24_help", log: "Q24救錯: 不要亂說！" },
+                    { text: "C. 發片日", next: "q24_help", log: "Q24救錯: 這是野台表演日" },
+                    { text: "D. 團員生日", next: "q24_help", log: "Q24救錯: 五人生日都不同天" }
+                ]
+            },
+
+            // --- 第 25 關：燙傷急救 ---
+            "q25": {
+                tag: "第 25 關：急救處理",
+                text: "燙傷急救五步驟『沖、脫、泡、蓋、送』中，『沖』的時間建議應至少持續多久？",
+                options: [
+                    { text: "A. 15-30 分鐘", next: "q26", isCorrect: true },
+                    { text: "B. 1 分鐘", next: "q25_help", log: "Q25錯: 太短無法散熱" },
+                    { text: "C. 2 小時", next: "q25_help", log: "Q25錯: 太久會失溫" },
+                    { text: "D. 沖一下就好", next: "q25_help", log: "Q25錯: 深層散熱很重要" }
+                ]
+            },
+
+            // --- 第 26 關：食品添加物功能 ---
+            "q26": {
+                tag: "第 26 關：食品添加物",
+                text: "在食品加工中，為了提升保存性及預防食品中毒，會加入哪類添加物？",
+                options: [
+                    { text: "A. 防腐劑、抗氧化劑", next: "q27", isCorrect: true },
+                    { text: "B. 著色劑、香料", next: "q26_help", log: "Q26錯: 這是調整美觀" },
+                    { text: "C. 膨脹劑", next: "q26_help", log: "Q26錯: 這是增加體積" },
+                    { text: "D. 漂白劑", next: "q26_help", log: "Q26錯: 這是美化顏色" }
+                ]
+            },
+
+            // --- 第 27 關：環境衛生 (登革熱) ---
+            "q27": {
+                tag: "第 27 關：環境衛生",
+                text: "在台灣，登革熱主要是透過哪種昆蟲叮咬受感染者後，再叮咬健康的人而傳播？",
+                options: [
+                    { text: "A. 埃及斑蚊、白線斑蚊", next: "q28", isCorrect: true },
+                    { text: "B. 蒼蠅", next: "q27_help", log: "Q27錯: 蒼蠅傳播消化道疾病" },
+                    { text: "C. 蟑螂", next: "q27_help", log: "Q27錯: 蟑螂也是媒介但非登革熱" },
+                    { text: "D. 恙蟲", next: "q27_help", log: "Q27錯: 恙蟲病是另一種" }
+                ]
+            },
+
+            // 🎸 第 28 關：娛樂穿插 (五月天 7)
+            "q28": {
+                tag: "🎸 第 28 關：資深粉考驗 (五月天)",
+                text: "五月天在 2012 年成為第一組登上哪一個場地舉辦演唱會的華語樂團，這座場地被視為運動員與樂手的最高殿堂？",
+                options: [
+                    { text: "A. 北京鳥巢 (國家體育場)", next: "q29", isCorrect: true },
+                    { text: "B. 東京巨蛋", next: "q28_help", log: "Q28錯: 他們更晚才去巨蛋" },
+                    { text: "C. 台北小巨蛋", next: "q28_help", log: "Q28錯: 他們早已征服多次" },
+                    { text: "D. 倫敦溫布利", next: "q28_help", log: "Q28錯: 場地規模不同" }
+                ]
+            },
+
+            // --- 第 29 關：基改食品標示 ---
+            "q29": {
+                tag: "第 29 關：食品標示",
+                text: "食品之容器或外包裝，若含有基因改造食品原料，應如何標示？",
+                options: [
+                    { text: "A. 必須明顯標示「基因改造」字樣", next: "q30", isCorrect: true },
+                    { text: "B. 不用標示", next: "q29_help", log: "Q29錯: 法規強制標示" },
+                    { text: "C. 只需寫在成分最末端", next: "q29_help", log: "Q29錯: 字體有大小要求" },
+                    { text: "D. 僅限進口食品標示", next: "q29_help", log: "Q29錯: 國產也要" }
+                ]
+            },
+
+            // --- 第 30 關：最終魔王 (生命徵象) ---
+            "q30": {
+                tag: "🐉 最終關：生命守護",
+                text: "人體正常呼吸頻率為每分鐘 12-20 次，若成人安靜狀態下脈搏高於每分鐘多少次，通常被稱為「心跳過快」？",
+                options: [
+                    { text: "A. 100 次", next: "end", isCorrect: true },
+                    { text: "B. 60 次", next: "q30_help", log: "Q30錯: 60-100 為正常範圍" },
+                    { text: "C. 140 次", next: "q30_help", log: "Q30錯: 這是更高的風險值" },
+                    { text: "D. 80 次", next: "q30_help", log: "Q30錯: 80 尚在正常值內" }
+                ]
+            },
+            "q30_help": {
+                tag: "💊 提示：正常範圍",
+                text: "一般健康成人的脈搏正常範圍是 60 到 100 次，超過上限就是過快。所以上限是？",
+                options: [
+                    { text: "A. 100 次", next: "q30", isCorrect: true },
+                    { text: "B. 120 次", next: "q30_help", log: "Q30救錯: 100 次就是醫學定義的界線喔！" }
+                ]
+            }
+        };
+        // ==========================================
+        // 系統變數與遊戲邏輯
+        // ==========================================
+        let studentName = "";
+        let currentStep = "q1"; 
+        let hp = 30; // 🩸 放寬血量：30題給30滴血
+        let currentStreak = 0; // 🔥 連擊計算器
+        let diagnosticLogs = [];
+        let sessionCards = []; 
+        let failedQuestions = []; 
+        let startTime = 0;           
+        let totalTime = 0;           
+        let rescueTriggered = 0;     
+        let rescueFails = 0;
+	let isTransitioning = false; // 🚨 新增這行：防連點的鎖定開關
+
+
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbwQnum1bAGvOb-dv5hL08S0pzMB93_gN0ZmoqCQtUjKFYOT-vs8Df0iTT6OMpx_sb6pjg/exec';
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function saveToCollection(cardObj) {
+            let storageKey = "gachaCollection_" + studentName;
+            let pastCollection = JSON.parse(localStorage.getItem(storageKey)) || [];
+            let existingCard = pastCollection.find(c => c.id === cardObj.id);
+            if(existingCard) { existingCard.count += 1; } 
+            else { pastCollection.push({ ...cardObj, count: 1 }); }
+            localStorage.setItem(storageKey, JSON.stringify(pastCollection));
+        }
+
+        function openCollection() {
+            let inputName = document.getElementById('student-name').value.trim();
+            if(!inputName) { alert("請先輸入姓名！"); return; }
+            
+            let storageKey = "gachaCollection_" + inputName;
+            let pastCollection = JSON.parse(localStorage.getItem(storageKey)) || [];
+            
+            let normalPool = cardPool.filter(c => c.chance > 0);
+            let uniqueCount = normalPool.filter(mc => pastCollection.some(pc => pc.id === mc.id)).length;
+            let totalCount = normalPool.length;
+            document.getElementById('collection-title').innerText = `🏆 ${inputName} 的圖鑑 (${uniqueCount} / ${totalCount})`;
+            
+            let grid = document.getElementById('collection-grid');
+            grid.innerHTML = "";
+            
+            cardPool.forEach(masterCard => {
+                let ownedCard = pastCollection.find(c => c.id === masterCard.id);
+                if (masterCard.chance === 0 && !ownedCard) return; 
+
+                if (ownedCard) {
+                    let synthHtml = "";
+                    if (masterCard.rarity === "N" && ownedCard.count >= 5) {
+                        synthHtml = `<button class="btn-synth" onclick="synthesizeCard('${masterCard.id}')">✨ 5合1 覺醒</button>`;
+                    }
+                    grid.innerHTML += `
+                        <div class="mini-card">
+                            <div class="count">x${ownedCard.count}</div>
+                            <img src="${masterCard.image}" alt="${masterCard.name}">
+                            <div class="name">${masterCard.name}</div>
+                            ${synthHtml}
+                        </div>`;
+                } else {
+                    grid.innerHTML += `
+                        <div class="mini-card unowned">
+                            <img src="${masterCard.image}" alt="???">
+                            <div class="name">【???】未知卡片</div>
+                        </div>`;
+                }
+            });
+            document.getElementById('collection-modal').style.display = "flex";
+        }
+
+        function synthesizeCard(nCardId) {
+            let inputName = document.getElementById('student-name').value.trim();
+            let storageKey = "gachaCollection_" + inputName;
+            let pastCollection = JSON.parse(localStorage.getItem(storageKey)) || [];
+
+            let nCardIndex = pastCollection.findIndex(c => c.id === nCardId);
+            if (nCardIndex > -1 && pastCollection[nCardIndex].count >= 5) {
+                pastCollection[nCardIndex].count -= 5;
+                let spCardId = "c_sp1"; 
+                let spMaster = cardPool.find(c => c.id === spCardId);
+                let spCardIndex = pastCollection.findIndex(c => c.id === spCardId);
+                
+                if (spCardIndex > -1) { pastCollection[spCardIndex].count += 1; } 
+                else { pastCollection.push({ ...spMaster, count: 1 }); }
+                
+                localStorage.setItem(storageKey, JSON.stringify(pastCollection));
+                closeCollection();
+                showSynthesisAnimation(spMaster);
+            }
+        }
+
+        function showSynthesisAnimation(spCard) {
+            playSound('synth'); 
+            const overlay = document.getElementById('gacha-overlay');
+            const cardObj = document.getElementById('revealed-card');
+            
+            document.getElementById('pre-draw-btn').style.display = 'none';
+            document.getElementById('gacha-title').innerText = "✨ 碎片融合！傳說覺醒！ ✨";
+            
+            cardObj.className = "gacha-card card-SP"; 
+            document.getElementById('card-image').src = spCard.image; 
+            document.getElementById('card-image').style.display = 'block'; 
+            document.getElementById('card-name').innerText = spCard.name;
+            cardObj.style.display = 'flex';
+            
+            const postBtn = document.getElementById('post-draw-btn');
+            postBtn.innerText = "收下隱藏神卡";
+            postBtn.style.display = 'block';
+            postBtn.onclick = function() {
+                cardObj.style.transform = "scale(0)"; 
+                setTimeout(() => {
+                    overlay.style.display = "none";
+                    postBtn.innerText = "收下神卡並繼續";
+                    postBtn.onclick = closeGacha; 
+                    openCollection(); 
+                }, 300);
+            };
+            overlay.style.display = "flex";
+            setTimeout(() => { cardObj.style.transform = "scale(1)"; }, 100);
+        }
+
+        function closeCollection() { document.getElementById('collection-modal').style.display = "none"; }
+
+        function startGame() {
+            studentName = document.getElementById('student-name').value.trim();
+            if (!studentName) { alert("請先輸入姓名喔！"); return; }
+            startTime = Date.now();
+            initAudio(); 
+            document.getElementById('student-setup').style.display = 'none';
+            document.getElementById('game-area').style.display = 'block';
+            updateStatus();
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+
+	isTransitioning = false; // 🚨 新增這行：題目載入完成，解鎖按鈕
+            if (currentStep === "end") { finishGame(); return; }
+            const q = quizData[currentStep];
+            document.getElementById('q-tag').innerText = q.tag;
+            document.getElementById('q-text').innerHTML = q.text;
+
+            if (q.tag.includes("救援") || q.tag.includes("提示")) {
+                document.getElementById('q-tag').style.background = "#8e44ad"; 
+                document.body.classList.add('rescue-mode'); 
+            } else {
+                document.body.classList.remove('rescue-mode'); 
+                if (q.tag.includes("流行") || q.tag.includes("放鬆") || q.tag.includes("時間")) {
+                    document.getElementById('q-tag').style.background = "#27ae60"; 
+                } else {
+                    document.getElementById('q-tag').style.background = "#e74c3c"; 
+                }
+            }
+
+            const optionsArea = document.getElementById('options-area');
+            optionsArea.innerHTML = ""; 
+
+            let shuffledOptions = [...q.options];
+            shuffleArray(shuffledOptions);
+            const labels = ["A", "B", "C", "D"];
+
+            shuffledOptions.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'btn';
+                let cleanText = opt.text.replace(/^[A-D]\.\s*/, "");
+                btn.innerText = `${labels[index]}. ${cleanText}`;
+                // 🔥 將點擊事件改為傳遞 handleAnswer，判斷邏輯全部移交內部
+                btn.onclick = () => handleAnswer(opt);
+                optionsArea.appendChild(btn);
+            });
+        }
+
+        function handleAnswer(selectedOption) {
+	if (isTransitioning) return; 
+            isTransitioning = true; // 立刻上鎖
+            let isRescueQuestion = currentStep.includes("_help"); 
+
+            if (!selectedOption.isCorrect) {
+                playSound('wrong'); 
+                hp--; if(hp < 0) hp = 0; 
+                currentStreak = 0; // 🚨 答錯斷連擊
+                updateStatus();
+                if (selectedOption.log) diagnosticLogs.push(selectedOption.log);
+                
+                if (!failedQuestions.includes(currentStep)) {
+                    failedQuestions.push(currentStep);
+                }
+
+                if (!isRescueQuestion) { rescueTriggered++; } 
+                else { rescueFails++; }
+
+                currentStep = selectedOption.next;
+                renderQuestion();
+            } 
+            else {
+                playSound('correct'); 
+                showCorrectSplash();  
+                
+                // 💡 在「非救援題」答對，且之前沒死過，連擊數才 +1
+                if (!isRescueQuestion && !failedQuestions.includes(currentStep)) {
+                    currentStreak++;
+                }
+
+                setTimeout(() => {
+                    let nextStep = selectedOption.next;
+                    
+                    // 🔥 檢查是否達成 2 連擊
+                    if (currentStreak >= 2) {
+                        currentStreak = 0; // 抽卡後歸零
+                        currentStep = nextStep;
+                        document.getElementById('gacha-title').innerText = "🔥 二連擊達成！獲得抽卡機會！ ✨";
+                        prepareGacha(); 
+                    } else {
+                        currentStep = nextStep;
+                        renderQuestion();
+                    }
+                    updateStatus();
+                }, 800);
+            }
+        }
+
+        function showCorrectSplash() {
+            const splash = document.getElementById('correct-splash');
+            splash.classList.add('show');
+            setTimeout(() => { splash.classList.remove('show'); }, 600);
+        }
+
+        function updateStatus() {
+            let hpText = hp > 10 ? `❤️❤️ x ${hp}` : "❤️".repeat(hp);
+            document.getElementById('hearts').innerText = hpText;
+            document.getElementById('streak-display').innerText = `🔥 連擊: ${currentStreak} / 2`;
+        }
+
+        function prepareGacha() {
+            const overlay = document.getElementById('gacha-overlay');
+            document.getElementById('pre-draw-btn').style.display = 'block';
+            document.getElementById('revealed-card').style.display = 'none';
+            document.getElementById('post-draw-btn').style.display = 'none';
+            overlay.style.display = "flex";
+        }
+
+        function executeDraw() {
+            playSound('draw'); 
+            document.getElementById('pre-draw-btn').style.display = 'none';
+            document.getElementById('gacha-title').innerText = "🎉 戰利品揭曉 🎉";
+            drawCard(); 
+        }
+
+        function drawCard() {
+            const cardObj = document.getElementById('revealed-card');
+            let drawablePool = cardPool.filter(c => c.chance > 0);
+            let randomNum = Math.random() * 100;
+            let currentLimit = 0;
+            let resultCard = drawablePool[drawablePool.length - 1]; 
+            for (let i = 0; i < drawablePool.length; i++) {
+                currentLimit += drawablePool[i].chance;
+                if (randomNum <= currentLimit) { resultCard = drawablePool[i]; break; }
+            }
+
+            cardObj.className = "gacha-card"; 
+            cardObj.classList.add(`card-${resultCard.rarity}`);
+            document.getElementById('card-image').src = resultCard.image; 
+            document.getElementById('card-image').style.display = 'block'; 
+            document.getElementById('card-name').innerText = resultCard.name;
+            
+            cardObj.style.display = 'flex';
+            document.getElementById('post-draw-btn').style.display = 'block';
+            setTimeout(() => { cardObj.style.transform = "scale(1)"; }, 100);
+
+            sessionCards.push(resultCard.name);
+            saveToCollection(resultCard); 
+            document.getElementById('inventory-display').innerText = `🎒 本局已抽: ${sessionCards.length} 張`;
+        }
+
+        function closeGacha() {
+            const overlay = document.getElementById('gacha-overlay');
+            const cardObj = document.getElementById('revealed-card');
+            cardObj.style.transform = "scale(0)"; 
+            setTimeout(() => {
+                overlay.style.display = "none";
+                renderQuestion(); 
+            }, 300);
+        }
+
+        function finishGame() {
+            document.getElementById('game-area').style.display = 'none';
+            document.getElementById('result-area').style.display = 'block';
+
+            totalTime = Math.round((Date.now() - startTime) / 1000);
+
+            let reportArea = document.getElementById('log-report');
+            let finalScoreText = `血量剩餘：${hp}\n🕒 耗時：${totalTime} 秒\n🏀 本局共獲得 ${sessionCards.length} 張卡片\n\n`;
+            let logText = diagnosticLogs.length === 0 ? "🌟 完美通關，基礎極度扎實！" : "⚠️ 盲點診斷 (請老師留意)：\n" + diagnosticLogs.join("\n");
+            
+            reportArea.innerText = finalScoreText + logText;
+
+            let itemsText = sessionCards.length > 0 ? sessionCards.join(",") : "無";
+            sendDataToSheet(
+                studentName, hp, totalTime, rescueTriggered, rescueFails, 
+                diagnosticLogs.length, diagnosticLogs.join(" | "), itemsText
+            );
+        }
+
+        function sendDataToSheet(name, hp, time, rescueT, rescueF, errorCount, errorDetails, cards) {
+            let formData = new URLSearchParams();
+            formData.append('name', name);
+            formData.append('hp', hp);
+            formData.append('time', time);
+            formData.append('rescueTriggered', rescueT);
+            formData.append('rescueFails', rescueF); 
+            formData.append('errorCount', errorCount);
+            formData.append('errorDetails', errorDetails);
+            formData.append('cards', cards);
+            // 🚨 新增：抓取該學生目前的完整圖鑑，轉成文字一起傳到 Google 表單
+            let storageKey = "gachaCollection_" + name;
+            let fullCollection = localStorage.getItem(storageKey) || "[]";
+            formData.append('fullCollection', fullCollection);
+            fetch(scriptURL, { method: 'POST', body: formData });
+        }
+// 🚨 新增：雲端讀檔功能 
+        async function syncCloudData() {
+            let inputName = document.getElementById('student-name').value.trim();
+            if(!inputName) { alert("⚠️ 請先輸入您的姓名，才能尋找雲端存檔喔！"); return; }
+
+            // 讓按鈕顯示載入中，避免重複點擊
+            let syncBtn = document.getElementById('btn-sync');
+            let originalText = syncBtn.innerText;
+            syncBtn.innerText = "⏳ 雲端同步中，請稍候...";
+            syncBtn.disabled = true;
+
+            try {
+                // 向 Google Apps Script 發送 GET 請求讀取資料
+                let response = await fetch(scriptURL + "?name=" + encodeURIComponent(inputName), { method: "GET" });
+                let result = await response.json();
+
+                if(result.status === "success") {
+                    // 成功抓到資料，覆蓋掉當前電腦的記憶體
+                    localStorage.setItem("gachaCollection_" + inputName, result.data);
+                    alert("✅ 雲端同步成功！已為您載入最新的圖鑑進度！\n您可以點擊「查看我的圖鑑」確認。");
+                } else {
+                    alert("🆕 找不到您的雲端存檔。\n如果您是第一次玩，這是正常的，系統將為您建立全新圖鑑！");
+                }
+            } catch(e) {
+                alert("❌ 同步失敗，請檢查網路連線或稍後再試。");
+                console.error(e);
+            } finally {
+                // 恢復按鈕狀態
+                syncBtn.innerText = originalText;
+                syncBtn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
