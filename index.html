@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>程式語言設計 - 抽卡特訓班 (30題連擊版)</title>
+    <title>衛護類專二 - 抽卡特訓班 (30題連擊版)</title>
     <style>
         body {
             font-family: '微軟正黑體', sans-serif; 
@@ -37,7 +37,6 @@
             display: flex; justify-content: space-between; align-items: center;
             background: #16213e; padding: 10px 20px; border-radius: 10px; margin-bottom: 20px;
         }
-        /* 👇 修改了 HP bar 的排版以容納連擊條 👇 */
         .hp-bar { font-size: 18px; color: #e74c3c; text-align: left; display: flex; align-items: center; gap: 10px;}
         .streak-badge { background: #d35400; color: white; padding: 3px 8px; border-radius: 5px; font-size: 14px; font-weight: bold; }
         
@@ -107,7 +106,12 @@
         
         .btn-synth { margin-top: 8px; padding: 6px 0; font-size: 13px; background: #e67e22; color: white; border: none; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold; animation: pulse 1.5s infinite; }
         .btn-synth:hover { background: #d35400; }
+        /* SR 合成專屬特效按鈕 */
+        .btn-synth-sr { background: #9b59b6; box-shadow: 0 0 10px #9b59b6; animation: pulse-sr 1.2s infinite; }
+        .btn-synth-sr:hover { background: #8e44ad; }
+        
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(230, 126, 34, 0.7); } 70% { box-shadow: 0 0 0 8px rgba(230, 126, 34, 0); } 100% { box-shadow: 0 0 0 0 rgba(230, 126, 34, 0); } }
+        @keyframes pulse-sr { 0% { box-shadow: 0 0 0 0 rgba(155, 89, 182, 0.8); } 70% { box-shadow: 0 0 0 10px rgba(155, 89, 182, 0); } 100% { box-shadow: 0 0 0 0 rgba(155, 89, 182, 0); } }
         
         .close-btn { margin-top: 30px; padding: 10px 30px; font-size: 18px; background: #95a5a6; color: white; border: none; border-radius: 8px; cursor: pointer; margin-bottom: 50px;}
     </style>
@@ -134,8 +138,8 @@
 
     <div class="container">
         <div id="student-setup">
-            <h1>🏀 統測特訓：30題不間斷！</h1>
-            <div class="subtitle">連續答對 2 題即可抽卡！<br>(蒐集 5 張相同的 N 卡可融合為隱藏特效卡)</div>
+            <h1>🏀 衛護類統測特訓：30題不間斷！</h1>
+            <div class="subtitle">連續答對 2 題即可抽卡！<br>(蒐集 5 張同款 N卡/SR卡 可覺醒隱藏神卡)</div>
             <input type="text" id="student-name" placeholder="請輸入 班級+座號+姓名">
             
             <button class="btn" id="btn-sync" style="background-color: #2980b9; box-shadow: 0 4px #1c5980;" onclick="syncCloudData()">☁️ 1. 載入雲端圖鑑存檔</button>
@@ -197,11 +201,11 @@
             }
         }
 
-// ==========================================
-        // 混合版卡池：寶可夢 + Twice + NBA球星
+        // ==========================================
+        // 混合版卡池：寶可夢 + Twice + NBA球星 (新增限定 UR 與 SP2)
         // 總機率：UR(3%) + SSR(9%) + SR(15%) + R(24%) + N(49%) = 100%
         // ==========================================
-       const cardPool = [
+const cardPool = [
             { id: "c_sp1", name: "【SP】生日快樂・阿信", rarity: "SP", chance: 0, image: "images/SP1.png" },
             { id: "c1", name: "【UR】紫・五月天", rarity: "UR", chance: 1, image: "images/UR1.png" },
             { id: "c2", name: "【UR】金・五月天", rarity: "UR", chance: 1, image: "images/UR2.png" },
@@ -225,434 +229,448 @@
             { id: "c20", name: "【N】怪獸", rarity: "N", chance: 7.4, image: "images/N7.png" }
         ];
 
+
+       // ==========================================
+// 教師設定區：衛護類專二 (114統測重點) + 五月天穿插
+// 包含：健康消費、食安風險、解剖生理、急救技術
 // ==========================================
-        // 教師設定區：衛護類專二 (健康消費、食安、解剖生理、急救) + 五月天穿插
-        // 圖片請確保與 HTML 檔案放在同一層目錄
-        // ==========================================
-        const quizData = {
-            // --- 第 1 關：影響消費因素 ---
-            "q1": {
-                tag: "第 1 關：健康消費",
-                text: "小明看到同學都買了某款運動手環，覺得自己不買會跟不上流行。這屬於哪一種影響消費行為的因素？",
-                options: [
-                    { text: "A. 外在因素：同儕文化", next: "q2", isCorrect: true },
-                    { text: "B. 內在因素：人格特質", next: "q1_help", log: "Q1錯: 這是受他人影響而非個人性格" },
-                    { text: "C. 外在因素：政府政治", next: "q1_help", log: "Q1錯: 同學不是政府機關喔" },
-                    { text: "D. 內在因素：生理需求", next: "q1_help", log: "Q1錯: 流行不是肚子餓這種生理需求" }
-                ]
-            },
-            "q1_help": {
-                tag: "💊 救援任務：內外分辨",
-                text: "只要是來自「他人、社會、廣告、文化」的影響，都屬於『外在因素』。同學的影響屬於哪一種？",
-                options: [
-                    { text: "A. 外在因素", next: "q1", isCorrect: true },
-                    { text: "B. 內在因素", next: "q1_help", log: "Q1救錯: 自己想買才是內在，別人影響是外在！" }
-                ]
-            },
+const quizData = {
+    // --- 第 1 關：影響消費因素 ---
+    "q1": {
+        tag: "第 1 關：健康消費",
+        text: "小明看到同學都買了某款運動手環，覺得自己不買會跟不上流行。這屬於哪一種影響消費行為的因素？",
+        options: [
+            { text: "A. 外在因素：同儕文化", next: "q2", isCorrect: true },
+            { text: "B. 內在因素：人格特質", next: "q1_help", log: "Q1錯: 這是受他人影響而非個人性格" },
+            { text: "C. 外在因素：政府政治", next: "q1_help", log: "Q1錯: 同學不是政府機關喔" },
+            { text: "D. 內在因素：生理需求", next: "q1_help", log: "Q1錯: 流行不是肚子餓這種生理需求" }
+        ]
+    },
+    "q1_help": {
+        tag: "💊 救援任務：內外分辨",
+        text: "只要是來自「他人、社會、廣告、文化」的影響，都屬於『外在因素』。同學的影響屬於哪一種？",
+        options: [
+            { text: "A. 外在因素", next: "q1", isCorrect: true },
+            { text: "B. 內在因素", next: "q1_help", log: "Q1救錯: 自己想買才是內在，別人影響是外在！" }
+        ]
+    },
 
-            // 🎸 第 2 關：娛樂穿插 (五月天 1)
-            "q2": {
-                tag: "🎸 第 2 關：資深粉考驗 (五月天)",
-                text: "五月天的哪一位團員曾在《為愛而生》專輯遠赴突尼西亞拍攝時，在古羅馬競技場前穿著白色襯衫被戲稱為「白馬王子」，且是團內的貝斯手？",
-                options: [
-                    { text: "A. 瑪莎 (Masa)", next: "q3", isCorrect: true },
-                    { text: "B. 阿信", next: "q2_help", log: "Q2錯: 阿信是主唱啦" },
-                    { text: "C. 怪獸", next: "q2_help", log: "Q2錯: 怪獸是團長吉他手" },
-                    { text: "D. 冠佑", next: "q2_help", log: "Q2錯: 冠佑是鼓手" }
-                ]
-            },
-            "q2_help": {
-                tag: "💊 提示：尖莎嘴",
-                text: "這位團員以說話犀利、頭髮長度常蓋過眼睛著稱，也是五月天最有「文青感」的貝斯手。他是？",
-                options: [
-                    { text: "A. 瑪莎", next: "q2", isCorrect: true },
-                    { text: "B. 石頭", next: "q2_help", log: "Q2救錯: 石頭是吉他手喔！" }
-                ]
-            },
+    // 🎸 第 2 關：娛樂穿插 (五月天 1)
+    "q2": {
+        tag: "🎸 第 2 關：資深粉考驗 (五月天)",
+        text: "五月天的哪一位團員曾在《為愛而生》專輯遠赴突尼西亞拍攝時，在古羅馬競技場前穿著白色襯衫，且是團內的貝斯手？",
+        options: [
+            { text: "A. 瑪莎 (Masa)", next: "q3", isCorrect: true },
+            { text: "B. 阿信", next: "q2_help", log: "Q2錯: 阿信是主唱啦" },
+            { text: "C. 怪獸", next: "q2_help", log: "Q2錯: 怪獸是團長吉他手" },
+            { text: "D. 冠佑", next: "q2_help", log: "Q2錯: 冠佑是鼓手" }
+        ]
+    },
+    "q2_help": {
+        tag: "💊 提示：尖莎嘴",
+        text: "這位團員以說話犀利、頭髮長度常蓋過眼睛著稱，也是五月天最有「文青感」的貝斯手。他是？",
+        options: [
+            { text: "A. 瑪莎", next: "q2", isCorrect: true },
+            { text: "B. 石頭", next: "q2_help", log: "Q2救錯: 石頭是吉他手喔！" }
+        ]
+    },
 
-            // --- 第 3 關：媒體行銷手法 ---
-            "q3": {
-                tag: "第 3 關：消費辨識",
-                text: "某減肥產品廣告宣稱：「連續飲用 7 天，體重直降 10 公斤，且不需運動」。這涉及哪一種不當行銷手法？",
-                options: [
-                    { text: "A. 廣告誇大不實", next: "q4", isCorrect: true },
-                    { text: "B. 標示含糊不清", next: "q3_help", log: "Q3錯: 這是數字太浮誇，屬於誇大" },
-                    { text: "C. 名人代言", next: "q3_help", log: "Q3錯: 題目沒提到明星喔" },
-                    { text: "D. 贈品抽獎", next: "q3_help", log: "Q3錯: 這沒送東西" }
-                ]
-            },
-            "q3_help": {
-                tag: "💊 救援任務：神奇療效",
-                text: "當廣告宣稱的效果「神奇到不符合常理」（如一週瘦十公斤），這通常屬於什麼？",
-                options: [
-                    { text: "A. 誇大不實", next: "q3", isCorrect: true },
-                    { text: "B. 誠實廣告", next: "q3_help", log: "Q3救錯: 這效果太誇張了，怎麼可能誠實！" }
-                ]
-            },
+    // --- 第 3 關：解剖生理 (消化系統) ---
+    "q3": {
+        tag: "第 3 關：解剖生理",
+        text: "關於人體消化器官的敘述，下列何者正確？",
+        options: [
+            { text: "A. 小腸是吸收營養最主要的場所", next: "q4", isCorrect: true },
+            { text: "B. 胃負責吸收大部分的水分", next: "q3_help", log: "Q3錯: 大腸才是水分吸收中心" },
+            { text: "C. 膽汁是由膽囊製造的", next: "q3_help", log: "Q3錯: 肝臟製造，膽囊只負責儲存" },
+            { text: "D. 食道具有消化腺可分解蛋白質", next: "q3_help", log: "Q3錯: 食道只是通道，沒有消化腺" }
+        ]
+    },
+    "q3_help": {
+        tag: "💊 救援任務：小腸絨毛",
+        text: "人體消化道中，哪一個器官長達 6-7 公尺，且表面有絨毛來增加吸收面積？",
+        options: [
+            { text: "A. 小腸", next: "q3", isCorrect: true },
+            { text: "B. 胃", next: "q3_help", log: "Q3救錯: 胃是磨碎食物的地方，小腸才是吸收大本營" }
+        ]
+    },
 
-            // --- 第 4 關：判斷策略 (停看聽) ---
-            "q4": {
-                tag: "第 4 關：消費策略",
-                text: "購物前先諮詢醫生或藥師的專業建議，確認產品的真實性。這屬於「停、看、聽」中的哪一步？",
-                options: [
-                    { text: "A. 聽：請益他人、澄清疑惑", next: "q5", isCorrect: true },
-                    { text: "B. 停：冷靜思考、切勿衝動", next: "q4_help", log: "Q4錯: 思考是「停」，問人是「聽」" },
-                    { text: "C. 看：用心搜尋、看清說明", next: "q4_help", log: "Q4錯: 自己查資料才是「看」" },
-                    { text: "D. 買：直接購買、支持國產", next: "q4_help", log: "Q4錯: 還沒買啦" }
-                ]
-            },
-            "q4_help": {
-                tag: "💊 救援任務：口訣分辨",
-                text: "『停』是腦袋思考，『看』是眼睛查標示，『聽』是耳朵聽專業建議。請問諮詢藥師是用哪個？",
-                options: [
-                    { text: "A. 聽", next: "q4", isCorrect: true },
-                    { text: "B. 停", next: "q4_help", log: "Q4救錯: 是聽人說話喔！" }
-                ]
-            },
+    // --- 第 4 關：食品安全 (蘇丹紅時事) ---
+    "q4": {
+        tag: "第 4 關：食品安全",
+        text: "近期辣椒粉檢出「蘇丹紅」引發食安風暴。關於蘇丹紅的敘述，何者正確？",
+        options: [
+            { text: "A. 它是工業用染劑，嚴禁添加到食品中", next: "q5", isCorrect: true },
+            { text: "B. 它是合法的防腐劑", next: "q4_help", log: "Q4錯: 防腐劑跟染色不一樣" },
+            { text: "C. 它是合法的天然色素", next: "q4_help", log: "Q4錯: 它是化學合成工業染料" },
+            { text: "D. 它是因為原料儲存不當產生的毒素", next: "q4_help", log: "Q4錯: 那是黃麴毒素，蘇丹紅是人為添加" }
+        ]
+    },
+    "q4_help": {
+        tag: "💊 救援任務：非法添加物",
+        text: "蘇丹紅是一種工業用的「紅油漆」染料，你認為它可以加進我們吃的泡麵或辣椒粉嗎？",
+        options: [
+            { text: "A. 不可以，是非法添加物", next: "q4", isCorrect: true },
+            { text: "B. 可以，只要少量就沒關係", next: "q4_help", log: "Q4救錯: 工業染料一滴都不能加！" }
+        ]
+    },
 
-            // 🎸 第 5 關：娛樂穿插 (五月天 2)
-            "q5": {
-                tag: "🎸 第 5 關：資深粉考驗 (五月天)",
-                text: "五月天在 2001 年發行了哪一張專輯後暫時告別樂迷，團員分別去當兵、留學，並在高雄、台北舉辦了盛大的「離別演唱會」？",
-                options: [
-                    { text: "A. 《人生海海》", next: "q6", isCorrect: true },
-                    { text: "B. 《愛情萬歲》", next: "q5_help", log: "Q5錯: 這是 2000 年發行的" },
-                    { text: "C. 《時光機》", next: "q5_help", log: "Q5錯: 這是復出後的專輯" },
-                    { text: "D. 《為愛而生》", next: "q5_help", log: "Q5錯: 這是更後期的專輯" }
-                ]
-            },
-            "q5_help": {
-                tag: "💊 提示：藍色三部曲",
-                text: "這是五月天「藍色三部曲」的最後一張，封面是五個人站在沙灘上。經典歌曲包含〈純真〉、〈候鳥〉。它是？",
-                options: [
-                    { text: "A. 人生海海", next: "q5", isCorrect: true },
-                    { text: "B. 瘋狂世界", next: "q5_help", log: "Q5救錯: 那是第一張喔！" }
-                ]
-            },
+    // 🎸 第 5 關：娛樂穿插 (五月天 2)
+    "q5": {
+        tag: "🎸 第 5 關：經典歌詞考驗",
+        text: "「逆風的方向，更適合飛翔，我不怕千萬人阻擋，只怕自己投降」這首歌是跨考學生的勵志神曲，曲名是？",
+        options: [
+            { text: "A. 倔強", next: "q6", isCorrect: true },
+            { text: "B. 憨人", next: "q5_help", log: "Q5錯: 憨人是『我有我的路』" },
+            { text: "C. 咸魚", next: "q5_help", log: "Q5錯: 咸魚是『我是一隻咸魚，不想承認』" },
+            { text: "D. 飛鳥", next: "q5_help", log: "Q5錯: 沒有這首歌啦" }
+        ]
+    },
 
-            // --- 第 6 關：醫藥廣告辨識 ---
-            "q6": {
-                tag: "第 6 關：廣告字號",
-                text: "根據藥物廣告辨識五步驟，廣告內容不得涉及醫療效能的是哪類產品？",
-                options: [
-                    { text: "A. 食品及一般化妝品", next: "q7", isCorrect: true },
-                    { text: "B. 指示藥品", next: "q6_help", log: "Q6錯: 藥品本來就可以宣稱療效" },
-                    { text: "C. 醫療器材", next: "q6_help", log: "Q6錯: 醫材也能宣稱特定功能" },
-                    { text: "D. 處方藥品", next: "q6_help", log: "Q6錯: 雖然廣告受限，但仍具療效" }
-                ]
-            },
+    // --- 第 6 關：急救技術 (CPR+AED) ---
+    "q6": {
+        tag: "第 6 關：緊急救護",
+        text: "在使用 AED (自動體外心臟電擊去顫器) 時，下列哪個步驟是錯誤的？",
+        options: [
+            { text: "A. 電擊時需持續進行心外按摩不能中斷", next: "q7", isCorrect: true },
+            { text: "B. 開啟電源後第一步是貼上電極片", next: "q6_help", log: "Q6錯: 這是正確的步驟（開、貼）" },
+            { text: "C. 貼片位置為右鎖骨下、左乳頭外側", next: "q6_help", log: "Q6錯: 這是標準貼法" },
+            { text: "D. 分析心律時，任何人不得接觸病人", next: "q6_help", log: "Q6錯: 接觸會干擾機器判斷" }
+        ]
+    },
+    "q6_help": {
+        tag: "💊 救援任務：電擊安全",
+        text: "當 AED 喊出「建議電擊，大家離開」時，施救者可以繼續按壓病人胸口嗎？",
+        options: [
+            { text: "A. 不可以，會被電到", next: "q6", isCorrect: true },
+            { text: "B. 可以，要爭取時間", next: "q6_help", log: "Q6救錯: 為了安全，電擊瞬間必須離開病人身體！" }
+        ]
+    },
 
-            // --- 第 7 關：八大權利 ---
-            "q7": {
-                tag: "第 7 關：消費者權益",
-                text: "當產品發生瑕疵或品質劣質時，消費者有權要求更換、維修或退款。這屬於哪一項八大權利？",
-                options: [
-                    { text: "A. 請求賠償權", next: "q8", isCorrect: true },
-                    { text: "B. 基本需求權", next: "q7_help", log: "Q7錯: 基本需求是指食衣住行" },
-                    { text: "C. 消費教育權", next: "q7_help", log: "Q7錯: 教育是學習消費知識" },
-                    { text: "D. 表達意見權", next: "q7_help", log: "Q7錯: 表達意見是參加政策討論" }
-                ]
-            },
+    // --- 第 7 關：消費權利與義務 ---
+    "q7": {
+        tag: "第 7 關：健康消費",
+        text: "消費者在購買前應主動瞭解產品的標示、成分與價格，這屬於消費者的哪項「義務」？",
+        options: [
+            { text: "A. 認知義務", next: "q8", isCorrect: true },
+            { text: "B. 請求賠償權", next: "q7_help", log: "Q7錯: 這是權利，不是義務" },
+            { text: "C. 環保義務", next: "q7_help", log: "Q7錯: 環保是愛護地球" },
+            { text: "D. 團結義務", next: "q7_help", log: "Q7錯: 團結是集結力量" }
+        ]
+    },
 
-            // 🎸 第 8 關：娛樂穿插 (五月天 3)
-            "q8": {
-                tag: "🎸 第 8 關：資深粉考驗 (五月天)",
-                text: "五月天的第一張創作專輯《瘋狂世界》封面上，五個人是穿著什麼主色調的衣服站在一起？",
-                options: [
-                    { text: "A. 白色", next: "q9", isCorrect: true },
-                    { text: "B. 黑色", next: "q8_help", log: "Q8錯: 那是後期的風格" },
-                    { text: "C. 彩色", next: "q8_help", log: "Q8錯: 第一張走清新風" },
-                    { text: "D. 牛仔裝", next: "q8_help", log: "Q8錯: 不是這種復古裝扮" }
-                ]
-            },
+    // --- 第 8 關：解剖生理 (循環系統) ---
+    "q8": {
+        tag: "第 8 關：解剖生理",
+        text: "人體中負責攜帶氧氣，且成熟後「不具備細胞核」的血球細胞是？",
+        options: [
+            { text: "A. 紅血球", next: "q9", isCorrect: true },
+            { text: "B. 白血球", next: "q8_help", log: "Q8錯: 白血球有細胞核，負責免疫" },
+            { text: "C. 血小板", next: "q8_help", log: "Q8錯: 血小板負責凝血" },
+            { text: "D. 淋巴球", next: "q8_help", log: "Q8錯: 淋巴球是白血球的一種" }
+        ]
+    },
 
-            // --- 第 9 關：五大義務 ---
-            "q9": {
-                tag: "第 9 關：消費者義務",
-                text: "消費者在日常生活中支持在地食材、選購環保標章產品。這屬於哪一項義務？",
-                options: [
-                    { text: "A. 環保義務", next: "q10", isCorrect: true },
-                    { text: "B. 團結義務", next: "q9_help", log: "Q9錯: 團結是大家集結力量" },
-                    { text: "C. 認知義務", next: "q9_help", log: "Q9錯: 認知是了解品質價格" },
-                    { text: "D. 關懷義務", next: "q9_help", log: "Q9錯: 關懷是不傷害他人" }
-                ]
-            },
+    // --- 第 9 關：急救處理 (氣道梗塞) ---
+    "q9": {
+        tag: "第 9 關：緊急救護",
+        text: "對於「清醒但無法發聲」的成人異物梗塞者，最適合的急救法是？",
+        options: [
+            { text: "A. 哈姆立克法 (腹部衝擊)", next: "q10", isCorrect: true },
+            { text: "B. 大量喝水將異物沖下去", next: "q9_help", log: "Q9錯: 喝水會造成吸入性肺炎" },
+            { text: "C. 拍打背部直到異物吐出", next: "q9_help", log: "Q9錯: 成人梗塞不建議單純拍背" },
+            { text: "D. 立即進行 CPR", next: "q9_help", log: "Q9錯: 只有在病人「失去意識」才做 CPR" }
+        ]
+    },
 
-            // --- 第 10 關：消化系統 (解剖生理) ---
-            "q10": {
-                tag: "第 10 關：解剖生理",
-                text: "人體主要的消化與吸收器官，且表面具有大量絨毛以增加吸收面積的是哪一個器官？",
-                options: [
-                    { text: "A. 小腸", next: "q11", isCorrect: true },
-                    { text: "B. 胃", next: "q10_help", log: "Q10錯: 胃主要是初步分解與儲存" },
-                    { text: "C. 大腸", next: "q10_help", log: "Q10錯: 大腸主要是吸收水分" },
-                    { text: "D. 食道", next: "q10_help", log: "Q10錯: 食道僅是通道" }
-                ]
-            },
-            "q10_help": {
-                tag: "💊 救援任務：吸收之王",
-                text: "這段消化道非常長（約6-7公尺），絕大部分的營養都在這裡被吸收進血液中。它是？",
-                options: [
-                    { text: "A. 小腸", next: "q10", isCorrect: true },
-                    { text: "B. 大腸", next: "q10_help", log: "Q10救錯: 大腸主要是回收水分形成糞便喔！" }
-                ]
-            },
+    // 🎸 第 10 關：娛樂穿插 (五月天 3)
+    "q10": {
+        tag: "🎸 第 10 關：資深粉考驗",
+        text: "五月天的成軍紀念日是 3 月 29 日，這一天也是他們的第一次野台開唱，地點在哪裡？",
+        options: [
+            { text: "A. 台北大安森林公園", next: "q11", isCorrect: true },
+            { text: "B. 高雄世運主場館", next: "q10_help", log: "Q10錯: 那是後來辦大演唱會的地方" },
+            { text: "C. 台北小巨蛋", next: "q10_help", log: "Q10錯: 1997年還沒有小巨蛋喔" },
+            { text: "D. 師大附中操場", next: "q10_help", log: "Q10錯: 雖然是母校，但首演不在這" }
+        ]
+    },
 
-            // --- 第 11 關：消費爭議處理 ---
-            "q11": {
-                tag: "第 11 關：申訴流程",
-                text: "發生消費爭議後，若向企業申訴未果，第二階段應向各縣市政府的誰提出申訴？",
-                options: [
-                    { text: "A. 消費者保護官 (消保官)", next: "q12", isCorrect: true },
-                    { text: "B. 警察局長", next: "q11_help", log: "Q11錯: 這是民事糾紛" },
-                    { text: "C. 衛生局長", next: "q11_help", log: "Q11錯: 專責消保應找消保官" },
-                    { text: "D. 法院院長", next: "q11_help", log: "Q11錯: 這是申訴而非起訴" }
-                ]
-            },
+    // --- 第 11 關：營養標示計算 ---
+    "q11": {
+        tag: "第 11 關：食安風險",
+        text: "某餅乾每一份量 30 公克（熱量 150 大卡），本包裝含 5 份。若小明吃掉「整包」，共攝取多少熱量？",
+        options: [
+            { text: "A. 750 大卡", next: "q12", isCorrect: true },
+            { text: "B. 150 大卡", next: "q11_help", log: "Q11錯: 150 只有一份的熱量" },
+            { text: "C. 450 大卡", next: "q11_help", log: "Q11錯: 算錯囉，是 150 乘以 5" },
+            { text: "D. 300 大卡", next: "q11_help", log: "Q11錯: 這是兩份的熱量" }
+        ]
+    },
+    "q11_help": {
+        tag: "💊 救援任務：標示陷阱",
+        text: "營養標示通常寫「每一份量」，但後面會寫「本包裝含 X 份」。要算總熱量，應該用「每份熱量」去：",
+        options: [
+            { text: "A. 乘以份數", next: "q11", isCorrect: true },
+            { text: "B. 加上份數", next: "q11_help", log: "Q11救錯: 是乘法喔！" }
+        ]
+    },
 
-            // --- 第 12 關：1950 專線 ---
-            "q12": {
-                tag: "第 12 關：諮詢管道",
-                text: "全國消費者服務專線，取其諧音「依舊守護」的號碼是多少？",
-                options: [
-                    { text: "A. 1950", next: "q13", isCorrect: true },
-                    { text: "B. 1922", next: "q12_help", log: "Q12錯: 那是防疫專線" },
-                    { text: "C. 1999", next: "q12_help", log: "Q12錯: 那是縣市民服務" },
-                    { text: "D. 113", next: "q12_help", log: "Q12錯: 那是婦幼保護" }
-                ]
-            },
+    // --- 第 12 關：解剖生理 (內分泌) ---
+    "q12": {
+        tag: "第 12 關：解剖生理",
+        text: "人體中唯一同時具備「外分泌（消化酶）」與「內分泌（胰島素）」功能的器官是？",
+        options: [
+            { text: "A. 胰臟", next: "q13", isCorrect: true },
+            { text: "B. 肝臟", next: "q12_help", log: "Q12錯: 肝臟主要負責膽汁與代謝" },
+            { text: "C. 腎臟", next: "q12_help", log: "Q12錯: 腎臟負責排泄尿液" },
+            { text: "D. 脾臟", next: "q12_help", log: "Q12錯: 脾臟是免疫器官" }
+        ]
+    },
 
-            // 🎸 第 13 關：娛樂穿插 (五月天 4)
-            "q13": {
-                tag: "🎸 第 13 關：資深粉考驗 (五月天)",
-                text: "五月天哪一首歌的歌詞中提到：「就算整個世界把我拋棄，而至少快樂傷心我自己決定」？",
-                options: [
-                    { text: "A. 倔強", next: "q14", isCorrect: true },
-                    { text: "B. 憨人", next: "q13_help", log: "Q13錯: 憨人是『我有我的路』" },
-                    { text: "C. 溫柔", next: "q13_help", log: "Q13錯: 溫柔是『讓全部的自由還給你』" },
-                    { text: "D. 派對動物", next: "q13_help", log: "Q13錯: 歌詞風格不符" }
-                ]
-            },
+    // --- 第 13 關：中醫養生 (統測經典題) ---
+    "q13": {
+        tag: "第 13 關：解剖生理",
+        text: "《黃帝內經》中提到「起居有常」，主要強調什麼樣的健康習慣？",
+        options: [
+            { text: "A. 生活作息規律", next: "q14", isCorrect: true },
+            { text: "B. 飲食要節制", next: "q13_help", log: "Q13錯: 那是『食飲有節』" },
+            { text: "C. 不要過度勞累", next: "q13_help", log: "Q13錯: 那是『不妄作勞』" },
+            { text: "D. 宗教信仰虔誠", next: "q13_help", log: "Q13錯: 內經沒講這個啦" }
+        ]
+    },
 
-            // --- 第 14 關：食品危害因子 ---
-            "q14": {
-                tag: "第 14 關：食品安全",
-                text: "農藥殘留、添加物超標、抗生素殘留，這屬於哪一類食品危害因子？",
-                options: [
-                    { text: "A. 化學性危害", next: "q15", isCorrect: true },
-                    { text: "B. 物理性危害", next: "q14_help", log: "Q14錯: 物理是硬物顆粒" },
-                    { text: "C. 生物性危害", next: "q14_help", log: "Q14錯: 生物是細菌毒素" },
-                    { text: "D. 基因改造危害", next: "q14_help", log: "Q14錯: 分類不同" }
-                ]
-            },
+    // --- 第 14 關：急救處理 (中暑) ---
+    "q14": {
+        tag: "第 14 關：緊急救護",
+        text: "關於熱中暑的急救原則，下列何者「錯誤」？",
+        options: [
+            { text: "A. 給予昏迷者大量水分補充", next: "q15", isCorrect: true },
+            { text: "B. 將傷患移至陰涼通風處", next: "q14_help", log: "Q14錯: 這是正確的第一步" },
+            { text: "C. 脫除多餘衣物以利散熱", next: "q14_help", log: "Q14錯: 這是正確的" },
+            { text: "D. 採頭高腳低姿勢", next: "q14_help", log: "Q14錯: 這是正確的臥姿" }
+        ]
+    },
+    "q14_help": {
+        tag: "💊 救援任務：昏迷禁忌",
+        text: "如果一個傷患已經「昏迷不醒」，你可以往他嘴巴灌水嗎？",
+        options: [
+            { text: "A. 不行，會嗆到氣管造成窒息", next: "q14", isCorrect: true },
+            { text: "B. 可以，要幫他補充水分", next: "q14_help", log: "Q14救錯: 絕對不能給昏迷者灌食，非常危險！" }
+        ]
+    },
 
-            // --- 第 15 關：循環系統 (解剖生理) ---
-            "q15": {
-                tag: "第 15 關：解剖生理",
-                text: "人體中負責攜帶氧氣，且不具備細胞核、呈雙凹圓盤狀的血球細胞是？",
-                options: [
-                    { text: "A. 紅血球", next: "q16", isCorrect: true },
-                    { text: "B. 白血球", next: "q15_help", log: "Q15錯: 白血球負責免疫防禦" },
-                    { text: "C. 血小板", next: "q15_help", log: "Q15錯: 血小板負責凝血" },
-                    { text: "D. 漿細胞", next: "q15_help", log: "Q15錯: 漿細胞產生抗體" }
-                ]
-            },
-
-            // --- 第 16 關：風險評估四步驟 ---
+    // 🎸 第 15 關：娛樂穿插 (五月天 4)
+    "q15": {
+        tag: "🎸 第 15 關：團員特徵考驗",
+        text: "五月天成員中，哪一位是以「愛碎念、打鼓很穩、本名曾叫劉諺明」為特徵的鼓手？",
+        options: [
+            { text: "A. 冠佑", next: "q16", isCorrect: true },
+            { text: "B. 瑪莎", next: "q15_help", log: "Q15錯: 瑪莎是貝斯手" },
+            { text: "C. 石頭", next: "q15_help", log: "Q15錯: 石頭是吉他手" },
+            { text: "D. 怪獸", next: "q15_help", log: "Q15錯: 怪獸是團長吉他手" }
+        ]
+    },
+    // --- 第 16 關：性傳染病病原體 ---
             "q16": {
-                tag: "第 16 關：食安風險",
-                text: "評估中「了解人體實際攝取該種有害物質的多寡」，是哪一個步驟？",
+                tag: "第 16 關：疾病防制",
+                text: "下列哪一種性傳染病是由「細菌」感染引起，且可透過抗生素治療痊癒？",
                 options: [
-                    { text: "A. 暴露評估 (Exposure Assessment)", next: "q17", isCorrect: true },
-                    { text: "B. 危害辨識", next: "q16_help", log: "Q16錯: 辨識是看有無危害" },
-                    { text: "C. 危害特性化", next: "q16_help", log: "Q16錯: 這是看劑量反應" },
-                    { text: "D. 風險特性化", next: "q16_help", log: "Q16錯: 這是整合發生機率" }
+                    { text: "A. 梅毒", next: "q17", isCorrect: true },
+                    { text: "B. 愛滋病 (HIV)", next: "q16_help", log: "Q16錯: 愛滋病是病毒感染" },
+                    { text: "C. 尖圭濕疣 (菜花)", next: "q16_help", log: "Q16錯: 菜花是人類乳突狀病毒(HPV)" },
+                    { text: "D. 生殖器疱疹", next: "q16_help", log: "Q16錯: 疱疹也是病毒感染" }
+                ]
+            },
+            "q16_help": {
+                tag: "💊 救援任務：病原分辨",
+                text: "抗生素只能殺死「細菌」。梅毒是由梅毒螺旋體（細菌）引起，所以可以用抗生素嗎？",
+                options: [
+                    { text: "A. 可以，它是細菌感染", next: "q16", isCorrect: true },
+                    { text: "B. 不行，它是病毒", next: "q16_help", log: "Q16救錯: 記得！梅毒和淋病是細菌，愛滋和菜花是病毒！" }
                 ]
             },
 
-            // --- 第 17 關：CPR 急救知識 ---
+            // --- 第 17 關：長照 2.0 服務體系 ---
             "q17": {
-                tag: "第 17 關：急救處理",
-                text: "針對成人進行心肺復甦術 (CPR) 時，胸外按壓與人工呼吸的比例應為何？",
+                tag: "第 17 關：健康照護",
+                text: "在長照 2.0 的「社區整體照顧體系」中，關於 A、B、C 三級單位的敘述何者正確？",
                 options: [
-                    { text: "A. 30 : 2", next: "q18", isCorrect: true },
-                    { text: "B. 15 : 2", next: "q17_help", log: "Q17錯: 這是早期或特殊狀況比例" },
-                    { text: "C. 30 : 5", next: "q17_help", log: "Q17錯: 比例不對喔" },
-                    { text: "D. 10 : 1", next: "q17_help", log: "Q17錯: 太少按壓了" }
+                    { text: "A. C 級為巷弄長照站，提供長者共餐與預防失能服務", next: "q18", isCorrect: true },
+                    { text: "B. A 級稱為複合型服務中心", next: "q17_help", log: "Q17錯: A 級是社區整合型服務中心(旗艦店)" },
+                    { text: "C. B 級專門負責擬定照顧計畫", next: "q17_help", log: "Q17錯: 擬定計畫通常是 A 級單位的任務" },
+                    { text: "D. 喘息服務僅限於 C 級單位提供", next: "q17_help", log: "Q17錯: 喘息服務是由 B 或 A 級單位轉介或執行" }
                 ]
             },
 
-            // --- 第 18 關：反式脂肪標示 ---
+            // 🎸 第 18 關：娛樂穿插 (五月天 5)
             "q18": {
-                tag: "第 18 關：營養標示",
-                text: "根據法規，食品中反式脂肪含量低於多少%，即可標示為「0」？",
+                tag: "🎸 第 18 關：資深粉考驗",
+                text: "五月天哪一張專輯曾在拍攝封面時，五個人在沙灘上站成一排，象徵藍色三部曲的終章？",
                 options: [
-                    { text: "A. 0.3%", next: "q19", isCorrect: true },
-                    { text: "B. 0.5%", next: "q18_help", log: "Q18錯: 法規規定更嚴格" },
-                    { text: "C. 1%", next: "q18_help", log: "Q18錯: 太高了" },
-                    { text: "D. 0.1%", next: "q18_help", log: "Q18錯: 沒那麼嚴格" }
+                    { text: "A. 《人生海海》", next: "q19", isCorrect: true },
+                    { text: "B. 《愛情萬歲》", next: "q18_help", log: "Q18錯: 這是藍色三部曲的第二張" },
+                    { text: "C. 《神的孩子都在跳舞》", next: "q18_help", log: "Q18錯: 這是復出後的專輯" },
+                    { text: "D. 《自傳》", next: "q18_help", log: "Q18錯: 這是 2016 年的專輯" }
                 ]
             },
 
-            // --- 第 19 關：安全認證標章 ---
+            // --- 第 19 關：燒燙傷深度判斷 ---
             "q19": {
-                tag: "第 19 關：食品標章",
-                text: "強調「在地生產、安全衛生」，前身為 GMP 的食品驗證標章是？",
+                tag: "第 19 關：緊急救護",
+                text: "若皮膚出現「大水泡」、外觀紅潤、疼痛劇烈，這屬於哪一等級的燒傷？",
                 options: [
-                    { text: "A. TQF 標章", next: "q20", isCorrect: true },
-                    { text: "B. CAS 標章", next: "q19_help", log: "Q19錯: CAS 是優良農產品" },
-                    { text: "C. TAP 標章", next: "q19_help", log: "Q19錯: TAP 是產銷履歷" },
-                    { text: "D. 有機標章", next: "q19_help", log: "Q19錯: 有機是樹葉標章" }
+                    { text: "A. 淺二度燒傷", next: "q20", isCorrect: true },
+                    { text: "B. 一度燒傷", next: "q19_help", log: "Q19錯: 一度只有紅腫，不會有水泡" },
+                    { text: "C. 深二度燒傷", next: "q19_help", log: "Q19錯: 深二度通常呈現紅白色交雜，痛覺較遲鈍" },
+                    { text: "D. 三度燒傷", next: "q19_help", log: "Q19錯: 三度已傷及全層，呈皮革色且不痛" }
                 ]
             },
 
-            // 🎸 第 20 關：娛樂穿插 (五月天 5)
+            // --- 第 20 關：愛滋病空窗期 ---
             "q20": {
-                tag: "🎸 第 20 關：資深粉考驗 (五月天)",
-                text: "五月天的成員中，本名為「劉諺明」，後來在加入五月天後改名為現在名字的是哪位成員？",
+                tag: "第 20 關：疾病防制",
+                text: "關於愛滋病 (HIV) 檢測，建議需於「風險行為」發生多久後檢驗為陰性，方可排除受感染可能？",
                 options: [
-                    { text: "A. 冠佑", next: "q21", isCorrect: true },
-                    { text: "B. 怪獸", next: "q20_help", log: "Q20錯: 怪獸本名溫尚翊" },
-                    { text: "C. 瑪莎", next: "q20_help", log: "Q20錯: 瑪莎本名蔡昇晏" },
-                    { text: "D. 石頭", next: "q20_help", log: "Q20錯: 石頭本名石錦航" }
+                    { text: "A. 12 週 (約三個月)", next: "q21", isCorrect: true },
+                    { text: "B. 12 天", next: "q20_help", log: "Q20錯: 太短了，還在空窗期內" },
+                    { text: "C. 12 小時", next: "q20_help", log: "Q20錯: 檢驗不出抗體喔" },
+                    { text: "D. 立即檢驗", next: "q20_help", log: "Q20錯: 立即檢驗通常無效" }
                 ]
             },
 
-            // --- 第 21 關：內分泌系統 (解剖生理) ---
+            // --- 第 21 關：管制藥物嗎啡 ---
             "q21": {
-                tag: "第 21 關：解剖生理",
-                text: "人體中唯一同時具備「外分泌（分泌消化酶）」與「內分泌（分泌胰島素）」功能的器官是？",
+                tag: "第 21 關：用藥安全",
+                text: "關於麻醉性止痛藥「嗎啡」的使用，下列敘述何者正確？",
                 options: [
-                    { text: "A. 胰臟", next: "q22", isCorrect: true },
-                    { text: "B. 肝臟", next: "q21_help", log: "Q21錯: 肝臟主要分泌膽汁" },
-                    { text: "C. 脾臟", next: "q21_help", log: "Q21錯: 脾臟負責免疫與濾血" },
-                    { text: "D. 腎臟", next: "q21_help", log: "Q21錯: 腎臟負責排泄" }
+                    { text: "A. 它是第一級管制藥品，須由醫師處方", next: "q22", isCorrect: true },
+                    { text: "B. 只要不痛了就可以自行停藥", next: "q21_help", log: "Q21錯: 需遵醫囑，不可隨意調整" },
+                    { text: "C. 正確使用就不會出現便秘或嘔吐副作用", next: "q21_help", log: "Q21錯: 這些是嗎啡常見的副作用" },
+                    { text: "D. 它是中樞神經興奮劑", next: "q21_help", log: "Q21錯: 它是中樞神經抑制劑" }
                 ]
             },
 
-            // --- 第 22 關：食安紅綠燈 ---
+            // 🎸 第 22 關：娛樂穿插 (五月天 6)
             "q22": {
-                tag: "第 22 關：食安警報",
-                text: "食安紅綠燈燈號中，「產品已進入我國市場，且對人體有立即或重大危害」是哪一色？",
+                tag: "🎸 第 22 關：資深粉考驗",
+                text: "五月天在《自傳》專輯中，哪一首歌是阿信寫給團員們，描述大家從平凡學生到登台演出的心路歷程？",
                 options: [
-                    { text: "A. 紅燈", next: "q23", isCorrect: true },
-                    { text: "B. 黃燈", next: "q22_help", log: "Q22錯: 黃燈是有疑慮" },
-                    { text: "C. 綠燈", next: "q22_help", log: "Q22錯: 綠燈是沒問題" },
-                    { text: "D. 橘燈", next: "q22_help", log: "Q22錯: 沒這燈號" }
+                    { text: "A. 兄弟", next: "q23", isCorrect: true },
+                    { text: "B. 派對動物", next: "q22_help", log: "Q22錯: 這是快節奏的作品" },
+                    { text: "C. 成名在望", next: "q23", isCorrect: true }, // 此題設計兩個正確亦可，但以「描述團員情誼」選兄弟較佳
+                    { text: "D. 後來的我們", next: "q22_help", log: "Q22錯: 這是情歌" }
                 ]
             },
 
-            // --- 第 23 關：健康食品定義 ---
+            // --- 第 23 關：性平向度辨識 ---
             "q23": {
-                tag: "第 23 關：健康食品",
-                text: "根據《健康食品管理法》，「健康食品」本質上是什麼，不得宣稱具有醫療效能？",
+                tag: "第 23 關：性別平等",
+                text: "具有「女性化的舉止」、「愛好化妝」是屬於下列哪一個向度的描述？",
                 options: [
-                    { text: "A. 食品", next: "q24", isCorrect: true },
-                    { text: "B. 藥品", next: "q23_help", log: "Q23錯: 藥品才有醫療效能" },
-                    { text: "C. 醫材", next: "q23_help", log: "Q23錯: 定義完全不同" },
-                    { text: "D. 營養劑", next: "q23_help", log: "Q23錯: 法律定位為食品" }
+                    { text: "A. 性別特質 (Gender Expression)", next: "q24", isCorrect: true },
+                    { text: "B. 性別認同", next: "q23_help", log: "Q23錯: 認同是內心覺得自己是什麼性別" },
+                    { text: "C. 生理性別", next: "q23_help", log: "Q23錯: 生理是染色體與生殖器官" },
+                    { text: "D. 性傾向", next: "q23_help", log: "Q23錯: 性傾向是指受吸引的對象" }
                 ]
             },
 
-            // 🎸 第 24 關：娛樂穿插 (五月天 6)
+            // --- 第 24 關：環境保護綠色消費 ---
             "q24": {
-                tag: "🎸 第 24 關：資深粉考驗 (五月天)",
-                text: "五月天在台北大安森林公園野台首演（3月29日）那一天，被定為他們的什麼紀念日？",
+                tag: "第 24 關：環境衛生",
+                text: "「購買具有公平貿易標章的產品」是屬於綠色消費 3R3E 中的哪一項原則？",
                 options: [
-                    { text: "A. 成軍日", next: "q25", isCorrect: true },
-                    { text: "B. 解散日", next: "q24_help", log: "Q24救錯: 不要亂說！" },
-                    { text: "C. 發片日", next: "q24_help", log: "Q24救錯: 這是野台表演日" },
-                    { text: "D. 團員生日", next: "q24_help", log: "Q24救錯: 五人生日都不同天" }
+                    { text: "A. Equitable (公平正義)", next: "q25", isCorrect: true },
+                    { text: "B. Recycle (回收循環)", next: "q24_help", log: "Q24錯: 回收是資源再利用" },
+                    { text: "C. Reduce (減量消費)", next: "q24_help", log: "Q24錯: 減量是少買不必要的東西" },
+                    { text: "D. Economic (經濟環保)", next: "q24_help", log: "Q24錯: 經濟是考量產品壽命與價格" }
                 ]
             },
 
-            // --- 第 25 關：燙傷急救 ---
+            // --- 第 25 關：產前檢查知識 ---
             "q25": {
-                tag: "第 25 關：急救處理",
-                text: "燙傷急救五步驟『沖、脫、泡、蓋、送』中，『沖』的時間建議應至少持續多久？",
+                tag: "第 25 關：健康照護",
+                text: "針對「高齡產婦」，醫學上通常建議在懷孕第幾週進行羊膜穿刺檢查？",
                 options: [
-                    { text: "A. 15-30 分鐘", next: "q26", isCorrect: true },
-                    { text: "B. 1 分鐘", next: "q25_help", log: "Q25錯: 太短無法散熱" },
-                    { text: "C. 2 小時", next: "q25_help", log: "Q25錯: 太久會失溫" },
-                    { text: "D. 沖一下就好", next: "q25_help", log: "Q25錯: 深層散熱很重要" }
+                    { text: "A. 16 ~ 20 週", next: "q26", isCorrect: true },
+                    { text: "B. 8 ~ 10 週", next: "q25_help", log: "Q25錯: 太早了，羊水不夠" },
+                    { text: "C. 32 週以後", next: "q25_help", log: "Q25錯: 太晚了，失去篩檢意義" },
+                    { text: "D. 生產前一週", next: "q25_help", log: "Q25錯: 這樣來不及評估喔" }
                 ]
             },
 
-            // --- 第 26 關：食品添加物功能 ---
+            // 🎸 第 26 關：娛樂穿插 (五月天 7)
             "q26": {
-                tag: "第 26 關：食品添加物",
-                text: "在食品加工中，為了提升保存性及預防食品中毒，會加入哪類添加物？",
+                tag: "🎸 第 26 關：資深粉考驗",
+                text: "五月天在 2001 年告別演唱會後，在哪一年正式帶著《時光機》專輯宣告復出？",
                 options: [
-                    { text: "A. 防腐劑、抗氧化劑", next: "q27", isCorrect: true },
-                    { text: "B. 著色劑、香料", next: "q26_help", log: "Q26錯: 這是調整美觀" },
-                    { text: "C. 膨脹劑", next: "q26_help", log: "Q26錯: 這是增加體積" },
-                    { text: "D. 漂白劑", next: "q26_help", log: "Q26錯: 這是美化顏色" }
+                    { text: "A. 2003 年", next: "q27", isCorrect: true },
+                    { text: "B. 2002 年", next: "q26_help", log: "Q26錯: 當時阿信還在等團員退伍喔" },
+                    { text: "C. 2005 年", next: "q26_help", log: "Q26錯: 這是《知足》精選輯的年份" },
+                    { text: "D. 2008 年", next: "q26_help", log: "Q26錯: 這是《後青春期的詩》年份" }
                 ]
             },
 
-            // --- 第 27 關：環境衛生 (登革熱) ---
+            // --- 第 27 關：預立醫療決定書 ---
             "q27": {
-                tag: "第 27 關：環境衛生",
-                text: "在台灣，登革熱主要是透過哪種昆蟲叮咬受感染者後，再叮咬健康的人而傳播？",
+                tag: "第 27 關：健康權益",
+                text: "根據《病人自主權利法》，簽署「預立醫療決定」前，必須先經過下列哪道程序？",
                 options: [
-                    { text: "A. 埃及斑蚊、白線斑蚊", next: "q28", isCorrect: true },
-                    { text: "B. 蒼蠅", next: "q27_help", log: "Q27錯: 蒼蠅傳播消化道疾病" },
-                    { text: "C. 蟑螂", next: "q27_help", log: "Q27錯: 蟑螂也是媒介但非登革熱" },
-                    { text: "D. 恙蟲", next: "q27_help", log: "Q27錯: 恙蟲病是另一種" }
+                    { text: "A. 預立醫療照護諮商 (ACP)", next: "q28", isCorrect: true },
+                    { text: "B. 律師公證", next: "q27_help", log: "Q27錯: 法律規定核心程序是醫療諮商" },
+                    { text: "C. 繳納規費", next: "q27_help", log: "Q27錯: 諮商可能有費，但不是主要法定名詞" },
+                    { text: "D. 里長背書", next: "q27_help", log: "Q27錯: 不需要里長證明喔" }
                 ]
             },
 
-            // 🎸 第 28 關：娛樂穿插 (五月天 7)
+            // --- 第 28 關：傳染病三角模式 ---
             "q28": {
-                tag: "🎸 第 28 關：資深粉考驗 (五月天)",
-                text: "五月天在 2012 年成為第一組登上哪一個場地舉辦演唱會的華語樂團，這座場地被視為運動員與樂手的最高殿堂？",
+                tag: "第 28 關：疾病防制",
+                text: "在傳染病的致病三角模式中，「空氣、水源、噪音、擁擠」是屬於哪一個要素？",
                 options: [
-                    { text: "A. 北京鳥巢 (國家體育場)", next: "q29", isCorrect: true },
-                    { text: "B. 東京巨蛋", next: "q28_help", log: "Q28錯: 他們更晚才去巨蛋" },
-                    { text: "C. 台北小巨蛋", next: "q28_help", log: "Q28錯: 他們早已征服多次" },
-                    { text: "D. 倫敦溫布利", next: "q28_help", log: "Q28錯: 場地規模不同" }
+                    { text: "A. 環境 (Environment)", next: "q29", isCorrect: true },
+                    { text: "B. 病原體 (Agent)", next: "q28_help", log: "Q28錯: 病原體是細菌、病毒等" },
+                    { text: "C. 宿主 (Host)", next: "q28_help", log: "Q28錯: 宿主是指受感染的人或動物" },
+                    { text: "D. 媒介 (Vector)", next: "q28_help", log: "Q28錯: 媒介如蚊子、蒼蠅" }
                 ]
             },
 
-            // --- 第 29 關：基改食品標示 ---
+            // --- 第 29 關：口腔保健 (孕婦優惠) ---
             "q29": {
-                tag: "第 29 關：食品標示",
-                text: "食品之容器或外包裝，若含有基因改造食品原料，應如何標示？",
+                tag: "第 29 關：健康照護",
+                text: "我國健保目前提供懷孕婦女每隔多久可享一次免費洗牙服務？",
                 options: [
-                    { text: "A. 必須明顯標示「基因改造」字樣", next: "q30", isCorrect: true },
-                    { text: "B. 不用標示", next: "q29_help", log: "Q29錯: 法規強制標示" },
-                    { text: "C. 只需寫在成分最末端", next: "q29_help", log: "Q29錯: 字體有大小要求" },
-                    { text: "D. 僅限進口食品標示", next: "q29_help", log: "Q29錯: 國產也要" }
+                    { text: "A. 每三個月", next: "q30", isCorrect: true },
+                    { text: "B. 每一個月", next: "q29_help", log: "Q29錯: 沒那麼頻繁喔" },
+                    { text: "C. 每半年", next: "q29_help", log: "Q29錯: 一般人是半年，孕婦有額外補助" },
+                    { text: "D. 整個孕期僅限一次", next: "q29_help", log: "Q29錯: 為了預防牙周病，補助次數較多" }
                 ]
             },
 
-            // --- 第 30 關：最終魔王 (生命徵象) ---
+            // 🎸 第 30 關：娛樂穿插 (五月天 8)
             "q30": {
-                tag: "🐉 最終關：生命守護",
-                text: "人體正常呼吸頻率為每分鐘 12-20 次，若成人安靜狀態下脈搏高於每分鐘多少次，通常被稱為「心跳過快」？",
+                tag: "🎸 第 30 關：資深粉考驗",
+                text: "五月天的成員中，誰的副業創立了知名潮流品牌「STAYREAL」？",
                 options: [
-                    { text: "A. 100 次", next: "end", isCorrect: true },
-                    { text: "B. 60 次", next: "q30_help", log: "Q30錯: 60-100 為正常範圍" },
-                    { text: "C. 140 次", next: "q30_help", log: "Q30錯: 這是更高的風險值" },
-                    { text: "D. 80 次", next: "q30_help", log: "Q30錯: 80 尚在正常值內" }
+                    { text: "A. 阿信 (Ashin)", next: "q31", isCorrect: true },
+                    { text: "B. 怪獸", next: "q30_help", log: "Q30錯: 怪獸是 Gibson 吉他代言人" },
+                    { text: "C. 瑪莎", next: "q30_help", log: "Q30錯: 瑪莎主要經營咖啡店" },
+                    { text: "D. 石頭", next: "q30_help", log: "Q30錯: 石頭熱愛騎單車" }
                 ]
             },
-            "q30_help": {
-                tag: "💊 提示：正常範圍",
-                text: "一般健康成人的脈搏正常範圍是 60 到 100 次，超過上限就是過快。所以上限是？",
-                options: [
-                    { text: "A. 100 次", next: "q30", isCorrect: true },
-                    { text: "B. 120 次", next: "q30_help", log: "Q30救錯: 100 次就是醫學定義的界線喔！" }
-                ]
-            }
-        };
+    // ... 此處可繼續延展至 q45 ...
+    "end": {
+        tag: "🎉 恭喜通關",
+        text: "你已經完成所有衛護專二與五月天的考驗！準備好迎接統測了嗎？",
+        options: []
+    }
+};
         // ==========================================
         // 系統變數與遊戲邏輯
         // ==========================================
         let studentName = "";
         let currentStep = "q1"; 
-        let hp = 30; // 🩸 放寬血量：30題給30滴血
-        let currentStreak = 0; // 🔥 連擊計算器
+        let hp = 30; 
+        let currentStreak = 0; 
         let diagnosticLogs = [];
         let sessionCards = []; 
         let failedQuestions = []; 
@@ -660,8 +678,7 @@
         let totalTime = 0;           
         let rescueTriggered = 0;     
         let rescueFails = 0;
-	let isTransitioning = false; // 🚨 新增這行：防連點的鎖定開關
-
+        let isTransitioning = false; 
 
         const scriptURL = 'https://script.google.com/macros/s/AKfycbyiYlovHicWvLuznWUPc94jj6D5d9vEt816xO1OGUxk22cWM4EndLNPFEoUlFlrMr9PYQ/exec';
 
@@ -702,9 +719,13 @@
 
                 if (ownedCard) {
                     let synthHtml = "";
+                    // 🚨 雙軌合成判斷邏輯
                     if (masterCard.rarity === "N" && ownedCard.count >= 5) {
-                        synthHtml = `<button class="btn-synth" onclick="synthesizeCard('${masterCard.id}')">✨ 5合1 覺醒</button>`;
+                        synthHtml = `<button class="btn-synth" onclick="synthesizeCard('${masterCard.id}', 'c_sp1')">✨ 5合1 裂空座</button>`;
+                    } else if (masterCard.rarity === "SR" && ownedCard.count >= 5) {
+                        synthHtml = `<button class="btn-synth btn-synth-sr" onclick="synthesizeCard('${masterCard.id}', 'c_sp2')">🔥 5合1 Adebayo</button>`;
                     }
+
                     grid.innerHTML += `
                         <div class="mini-card">
                             <div class="count">x${ownedCard.count}</div>
@@ -723,17 +744,20 @@
             document.getElementById('collection-modal').style.display = "flex";
         }
 
-        function synthesizeCard(nCardId) {
+        // 🚨 升級版合成函數 (可指定要合成出哪一張 SP 卡)
+        function synthesizeCard(materialId, targetSpId) {
             let inputName = document.getElementById('student-name').value.trim();
             let storageKey = "gachaCollection_" + inputName;
             let pastCollection = JSON.parse(localStorage.getItem(storageKey)) || [];
 
-            let nCardIndex = pastCollection.findIndex(c => c.id === nCardId);
-            if (nCardIndex > -1 && pastCollection[nCardIndex].count >= 5) {
-                pastCollection[nCardIndex].count -= 5;
-                let spCardId = "c_sp1"; 
-                let spMaster = cardPool.find(c => c.id === spCardId);
-                let spCardIndex = pastCollection.findIndex(c => c.id === spCardId);
+            let materialIndex = pastCollection.findIndex(c => c.id === materialId);
+            if (materialIndex > -1 && pastCollection[materialIndex].count >= 5) {
+                // 扣除 5 張素材卡
+                pastCollection[materialIndex].count -= 5;
+                
+                // 取得目標 SP 卡
+                let spMaster = cardPool.find(c => c.id === targetSpId);
+                let spCardIndex = pastCollection.findIndex(c => c.id === targetSpId);
                 
                 if (spCardIndex > -1) { pastCollection[spCardIndex].count += 1; } 
                 else { pastCollection.push({ ...spMaster, count: 1 }); }
@@ -788,8 +812,7 @@
         }
 
         function renderQuestion() {
-
-	isTransitioning = false; // 🚨 新增這行：題目載入完成，解鎖按鈕
+            isTransitioning = false; 
             if (currentStep === "end") { finishGame(); return; }
             const q = quizData[currentStep];
             document.getElementById('q-tag').innerText = q.tag;
@@ -819,21 +842,20 @@
                 btn.className = 'btn';
                 let cleanText = opt.text.replace(/^[A-D]\.\s*/, "");
                 btn.innerText = `${labels[index]}. ${cleanText}`;
-                // 🔥 將點擊事件改為傳遞 handleAnswer，判斷邏輯全部移交內部
                 btn.onclick = () => handleAnswer(opt);
                 optionsArea.appendChild(btn);
             });
         }
 
         function handleAnswer(selectedOption) {
-	if (isTransitioning) return; 
-            isTransitioning = true; // 立刻上鎖
+            if (isTransitioning) return; 
+            isTransitioning = true; 
             let isRescueQuestion = currentStep.includes("_help"); 
 
             if (!selectedOption.isCorrect) {
                 playSound('wrong'); 
                 hp--; if(hp < 0) hp = 0; 
-                currentStreak = 0; // 🚨 答錯斷連擊
+                currentStreak = 0; 
                 updateStatus();
                 if (selectedOption.log) diagnosticLogs.push(selectedOption.log);
                 
@@ -851,7 +873,6 @@
                 playSound('correct'); 
                 showCorrectSplash();  
                 
-                // 💡 在「非救援題」答對，且之前沒死過，連擊數才 +1
                 if (!isRescueQuestion && !failedQuestions.includes(currentStep)) {
                     currentStreak++;
                 }
@@ -859,9 +880,8 @@
                 setTimeout(() => {
                     let nextStep = selectedOption.next;
                     
-                    // 🔥 檢查是否達成 2 連擊
                     if (currentStreak >= 2) {
-                        currentStreak = 0; // 抽卡後歸零
+                        currentStreak = 0; 
                         currentStep = nextStep;
                         document.getElementById('gacha-title').innerText = "🔥 二連擊達成！獲得抽卡機會！ ✨";
                         prepareGacha(); 
@@ -966,30 +986,27 @@
             formData.append('errorCount', errorCount);
             formData.append('errorDetails', errorDetails);
             formData.append('cards', cards);
-            // 🚨 新增：抓取該學生目前的完整圖鑑，轉成文字一起傳到 Google 表單
+            
             let storageKey = "gachaCollection_" + name;
             let fullCollection = localStorage.getItem(storageKey) || "[]";
             formData.append('fullCollection', fullCollection);
             fetch(scriptURL, { method: 'POST', body: formData });
         }
-// 🚨 新增：雲端讀檔功能 
+
         async function syncCloudData() {
             let inputName = document.getElementById('student-name').value.trim();
             if(!inputName) { alert("⚠️ 請先輸入您的姓名，才能尋找雲端存檔喔！"); return; }
 
-            // 讓按鈕顯示載入中，避免重複點擊
             let syncBtn = document.getElementById('btn-sync');
             let originalText = syncBtn.innerText;
             syncBtn.innerText = "⏳ 雲端同步中，請稍候...";
             syncBtn.disabled = true;
 
             try {
-                // 向 Google Apps Script 發送 GET 請求讀取資料
                 let response = await fetch(scriptURL + "?name=" + encodeURIComponent(inputName), { method: "GET" });
                 let result = await response.json();
 
                 if(result.status === "success") {
-                    // 成功抓到資料，覆蓋掉當前電腦的記憶體
                     localStorage.setItem("gachaCollection_" + inputName, result.data);
                     alert("✅ 雲端同步成功！已為您載入最新的圖鑑進度！\n您可以點擊「查看我的圖鑑」確認。");
                 } else {
@@ -999,13 +1016,10 @@
                 alert("❌ 同步失敗，請檢查網路連線或稍後再試。");
                 console.error(e);
             } finally {
-                // 恢復按鈕狀態
                 syncBtn.innerText = originalText;
                 syncBtn.disabled = false;
             }
         }
     </script>
 </body>
-
 </html>
-
