@@ -657,6 +657,201 @@ const quizData = {
                     { text: "D. 石頭", next: "q30_help", log: "Q30錯: 石頭熱愛騎單車" }
                 ]
             },
+    // --- 第 31 關：代謝症候群指標 ---
+            "q31": {
+                tag: "第 31 關：疾病防制",
+                text: "關於代謝症候群的五大判定指標，下列敘述何者正確？",
+                options: [
+                    { text: "A. 男生腰圍應維持在 90 公分以下", next: "q32", isCorrect: true },
+                    { text: "B. 三酸甘油脂應小於 200 mg/dl", next: "q31_help", log: "Q31錯: 標準應為小於 150 mg/dl" },
+                    { text: "C. 空腹血糖值應小於 126 mg/dl", next: "q31_help", log: "Q31錯: 代謝症候群標準是 100 mg/dl" },
+                    { text: "D. 只要符合一項指標即為代謝症候群", next: "q31_help", log: "Q31錯: 需符合三項或以上" }
+                ]
+            },
+            "q31_help": {
+                tag: "💊 救援任務：五項中三項",
+                text: "代謝症候群不是病，是警訊。只要五項指標中符合幾項，就算是有代謝症候群？",
+                options: [
+                    { text: "A. 三項", next: "q31", isCorrect: true },
+                    { text: "B. 五項全中", next: "q31_help", log: "Q31救錯: 只要中三項就是警訊囉！" }
+                ]
+            },
+
+            // --- 第 32 關：職業災害權益 ---
+            "q32": {
+                tag: "第 32 關：健康權益",
+                text: "小許在搬家公司上班，不幸因搬運冰箱導致腰椎脫位。關於職災給付的敘述何者正確？",
+                options: [
+                    { text: "A. 即使到職不滿 3 個月，依法仍可申請勞保職災給付", next: "q33", isCorrect: true },
+                    { text: "B. 必須工作滿一年才有職災保障", next: "q32_help", log: "Q32錯: 職災保障與年資無關" },
+                    { text: "C. 搬運造成的受傷屬於物理性危害", next: "q32_help", log: "Q32錯: 這屬於「人因工程」危害" },
+                    { text: "D. 只有在辦公室受傷才算職災", next: "q32_help", log: "Q32錯: 執行職務受傷皆算" }
+                ]
+            },
+
+            // 🎸 第 33 關：娛樂穿插 (五月天 9)
+            "q33": {
+                tag: "🎸 第 33 關：資深粉考驗",
+                text: "五月天哪一首歌的歌詞中提到：「期待一種色彩，期待抹去色彩，期待一種聲音，期待躲避聲音」？",
+                options: [
+                    { text: "A. 期待我的期待", next: "q34", isCorrect: true },
+                    { text: "B. 瘋狂世界", next: "q33_help", log: "Q33錯: 瘋狂世界是『如果說了後悔』" },
+                    { text: "C. 擁抱", next: "q33_help", log: "Q33錯: 擁抱是『脫下長日的假面』" },
+                    { text: "D. 恆星的恆心", next: "q33_help", log: "Q33錯: 歌詞不符喔" }
+                ]
+            },
+
+            // --- 第 34 關：食品安全標章 ---
+            "q34": {
+                tag: "第 34 關：食品安全",
+                text: "標榜「從農場到餐桌」全程追蹤，具有二維條碼（QR Code）可查詢生產記錄的標章是？",
+                options: [
+                    { text: "A. TAP 產銷履歷標章", next: "q35", isCorrect: true },
+                    { text: "B. CAS 優良農產品", next: "q34_help", log: "Q34錯: CAS 強調品質優良與衛生" },
+                    { text: "C. TQF 標章", next: "q34_help", log: "Q34錯: TQF 是由 GMP 轉型而來" },
+                    { text: "D. 鮮乳標章", next: "q34_help", log: "Q34錯: 這是針對乳製品" }
+                ]
+            },
+
+            // --- 第 35 關：自尊與行為 ---
+            "q35": {
+                tag: "第 35 關：心理健康",
+                text: "關於「低自尊者」的特質描述，下列何者較為正確？",
+                options: [
+                    { text: "A. 面對失敗時容易選擇逃避或自責", next: "q36", isCorrect: true },
+                    { text: "B. 對自己要求極高且不喜歡輸的感覺", next: "q35_help", log: "Q35錯: 這通常是高自尊者的競爭表現" },
+                    { text: "C. 容易拒絕外在誘惑", next: "q35_help", log: "Q35錯: 低自尊者較易受誘惑而從事危害健康行為" },
+                    { text: "D. 對未來充滿正向展望", next: "q35_help", log: "Q35錯: 這是高自尊的表現" }
+                ]
+            },
+
+            // 🎸 第 36 關：娛樂穿插 (五月天 10)
+            "q36": {
+                tag: "🎸 第 36 關：資深粉考驗",
+                text: "五月天成員中，哪一位曾經說過「如果我們不曾相遇，我會是在哪裡？」並以此創作了動人的歌曲？",
+                options: [
+                    { text: "A. 阿信 (Ashin)", next: "q37", isCorrect: true },
+                    { text: "B. 瑪莎", next: "q36_help", log: "Q36錯: 雖然他很有文采，但這首是阿信作詞" },
+                    { text: "C. 怪獸", next: "q36_help", log: "Q36錯: 怪獸主要是作曲大神" },
+                    { text: "D. 冠佑", next: "q36_help", log: "Q36救錯: 冠佑是負責節奏的！" }
+                ]
+            },
+
+            // --- 第 37 關：壓力反應辨識 ---
+            "q37": {
+                tag: "第 37 關：心理健康",
+                text: "當面臨壓力時，下列何者屬於壓力產生的「行為」影響？",
+                options: [
+                    { text: "A. 坐立難安、失眠", next: "q38", isCorrect: true },
+                    { text: "B. 頭痛、眩暈", next: "q37_help", log: "Q37錯: 這是生理反應" },
+                    { text: "C. 生氣、無助感", next: "q37_help", log: "Q37錯: 這是情緒反應" },
+                    { text: "D. 胃酸過多", next: "q37_help", log: "Q37錯: 這是生理反應" }
+                ]
+            },
+
+            // --- 第 38 關：避孕方法原理 ---
+            "q38": {
+                tag: "第 38 關：健康照護",
+                text: "關於「基礎體溫法」避孕的原理，下列敘述何者正確？",
+                options: [
+                    { text: "A. 排卵後，體溫會維持在較高溫的狀態", next: "q39", isCorrect: true },
+                    { text: "B. 排卵當天體溫會大幅下降", next: "q38_help", log: "Q38錯: 是排卵後受黃體素影響而上升" },
+                    { text: "C. 這是最保險的避孕方式", next: "q38_help", log: "Q38錯: 失敗率較高，非最保險" },
+                    { text: "D. 體溫上升代表正值月經期", next: "q38_help", log: "Q38錯: 體溫上升通常在排卵後" }
+                ]
+            },
+
+            // 🎸 第 39 關：娛樂穿插 (五月天 11)
+            "q39": {
+                tag: "🎸 第 39 關：資深粉考驗",
+                text: "五月天在《神的孩子都在跳舞》專輯中，遠赴哪一個國家的錄音室完成錄製？",
+                options: [
+                    { text: "A. 日本 (河口湖)", next: "q40", isCorrect: true },
+                    { text: "B. 美國 (洛杉磯)", next: "q39_help", log: "Q39錯: 那是《自傳》的部分錄音地" },
+                    { text: "C. 英國 (倫敦)", next: "q39_help", log: "Q39錯: 他們去過那裡開演唱會" },
+                    { text: "D. 法國 (巴黎)", next: "q39_help", log: "Q39錯: 沒去這錄音喔" }
+                ]
+            },
+
+            // --- 第 40 關：人工流產規範 ---
+            "q40": {
+                tag: "第 40 關：健康照護",
+                text: "關於人工流產口服藥物 RU486 的使用，下列敘述何者正確？",
+                options: [
+                    { text: "A. 必須先確定不是子宮外孕方可使用", next: "q41", isCorrect: true },
+                    { text: "B. 可以在一般藥局自行購買服用", next: "q40_help", log: "Q40錯: 必須在合格醫師指示下服用" },
+                    { text: "C. 懷孕 20 週以上仍可使用", next: "q40_help", log: "Q40錯: RU486 僅限早期懷孕使用" },
+                    { text: "D. 只要吃完藥就不需要回診", next: "q40_help", log: "Q40錯: 必須回診確認是否流產完全" }
+                ]
+            },
+
+            // --- 第 41 關：肺結核防治 ---
+            "q41": {
+                tag: "第 41 關：疾病防制",
+                text: "關於肺結核的防治與治療，下列敘述何者正確？",
+                options: [
+                    { text: "A. 主要是透過飛沫與空氣傳染", next: "q42", isCorrect: true },
+                    { text: "B. 多重抗藥性肺結核是第一類法定傳染病", next: "q41_help", log: "Q41錯: 它屬於第二類法定傳染病" },
+                    { text: "C. 藥物治療只需要持續服用一週", next: "q41_help", log: "Q41錯: 至少需規律服藥 6 個月以上" },
+                    { text: "D. 都治計畫是指由鄰居提醒吃藥", next: "q41_help", log: "Q41錯: 是由經過訓練的關懷員親眼目睹病人服藥" }
+                ]
+            },
+
+            // 🎸 第 42 關：娛樂穿插 (五月天 12)
+            "q42": {
+                tag: "🎸 第 42 關：資深粉考驗",
+                text: "五月天在 2012 年登上北京鳥巢，舉辦了哪一場主題的演唱會，創下 20 萬人觀看的紀錄？",
+                options: [
+                    { text: "A. 諾亞方舟 (Noah's Ark)", next: "q43", isCorrect: true },
+                    { text: "B. DNA 創造", next: "q42_help", log: "Q42錯: 這是 2009-2010 的巡演" },
+                    { text: "C. 人生無限公司", next: "q42_help", log: "Q42錯: 這是 2017 的巡演" },
+                    { text: "D. 十萬青年站出來", next: "q42_help", log: "Q42錯: 這是 2000 年的巡演" }
+                ]
+            },
+
+            // --- 第 43 關：食品安全 (危害分類) ---
+            "q43": {
+                tag: "第 43 關：食品安全",
+                text: "在食品中發現「碎玻璃、金屬碎片或石頭」，這屬於哪一類食品危害因子？",
+                options: [
+                    { text: "A. 物理性危害", next: "q44", isCorrect: true },
+                    { text: "B. 化學性危害", next: "q43_help", log: "Q43錯: 化學性是農藥或添加物" },
+                    { text: "C. 生物性危害", next: "q43_help", log: "Q43錯: 生物性是細菌或病毒" },
+                    { text: "D. 營養性危害", next: "q43_help", log: "Q43錯: 沒這類分類喔" }
+                ]
+            },
+
+            // --- 第 44 關：腦中風辨識 (FAST) ---
+            "q44": {
+                tag: "第 44 關：緊急救護",
+                text: "腦中風評估口訣「FAST」中，字母「A」代表的意義為何？",
+                options: [
+                    { text: "A. Arm (平舉雙臂，觀察是否有一隻手垂下)", next: "q45", isCorrect: true },
+                    { text: "B. Airway (維持呼吸道通暢)", next: "q44_help", log: "Q44錯: 這是 CPR 的 A，中風評估是 Arm" },
+                    { text: "C. Ambulance (立即叫救護車)", next: "q44_help", log: "Q44錯: 中風評估口訣中不包含這個" },
+                    { text: "D. Awake (觀察神智是否清醒)", next: "q44_help", log: "Q44錯: 標準口訣是 Arm" }
+                ]
+            },
+
+            // 🎸 第 45 關：最終挑戰 (五月天 13)
+            "q45": {
+                tag: "🎸 第 45 關：最終魔王 (五月天)",
+                text: "五月天在《後青春期的詩》專輯中，有一首歌歌詞寫道：「生命中最後一首詩，應該由誰來寫？」這首歌是？",
+                options: [
+                    { text: "A. 如煙", next: "end", isCorrect: true },
+                    { text: "B. 笑忘歌", next: "q45_help", log: "Q45錯: 笑忘歌是『這一生志願只要平凡快樂』" },
+                    { text: "C. 你不是真正的快樂", next: "q45_help", log: "Q45錯: 歌詞不符喔" },
+                    { text: "D. 突然好想你", next: "q45_help", log: "Q45錯: 這是描述思念的歌" }
+                ]
+            },
+            "q45_help": {
+                tag: "💊 提示：絕美歌詞",
+                text: "這首歌詞意深遠，描寫人生如煙消雲散，曾獲得金曲獎最佳作詞人。它是？",
+                options: [
+                    { text: "A. 如煙", next: "end", isCorrect: true },
+                    { text: "B. 溫柔", next: "q45_help", log: "Q45救錯: 快選如煙，這可是阿信的神作！" }
+                ]
+            },
     // ... 此處可繼續延展至 q45 ...
     "end": {
         tag: "🎉 恭喜通關",
@@ -721,7 +916,7 @@ const quizData = {
                     let synthHtml = "";
                     // 🚨 雙軌合成判斷邏輯
                     if (masterCard.rarity === "N" && ownedCard.count >= 5) {
-                        synthHtml = `<button class="btn-synth" onclick="synthesizeCard('${masterCard.id}', 'c_sp1')">✨ 5合1 裂空座</button>`;
+                        synthHtml = `<button class="btn-synth" onclick="synthesizeCard('${masterCard.id}', 'c_sp1')">✨ 5合1 解鎖</button>`;
                     } else if (masterCard.rarity === "SR" && ownedCard.count >= 5) {
                         synthHtml = `<button class="btn-synth btn-synth-sr" onclick="synthesizeCard('${masterCard.id}', 'c_sp2')">🔥 5合1 Adebayo</button>`;
                     }
